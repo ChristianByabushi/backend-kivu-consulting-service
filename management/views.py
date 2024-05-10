@@ -310,7 +310,7 @@ def payment_analysis(request):
             resultPayment['amount_paid_computed'] = 0
 
         result.append({
-            "order": CustomServiceOrderSerializer(order).data,
+            "order": ServiceOrderSerializer(order).data,
             "total_paid": resultPayment,
         })
     return Response({"result": result, "count": count}, status=status.HTTP_200_OK)
@@ -499,27 +499,35 @@ def products_analysis(request):
     return Response(result, status=status.HTTP_200_OK)
 
 
-class CustomServiceOrderAPIView(APIView):
-    permission_classes = [IsAdminUser]
+class ServiceOrderItemViewSet(viewsets.ModelViewSet):
+    queryset = ServiceOrderItem.objects.all()
+    serializer_class = ServiceOrderItemSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('description', 'category')
+    pagination_class = CustomPageNumberPagination
 
-    def get(self, request, pk=None, format=None):
-        if pk is not None:
+
+class ServiceOrderAPIView(APIView):
+    permission_classes = [IsAdminUser]
+    def get(self, request, format=None): 
+        datelimitleft = request.query_params.get('datelimitleft')
+        datelimitright = request.query_params.get('datelimitright')
+        customer = request.query_params.get('customer') 
+        category = request.query_params.get('category')
+        perpage = request.query_params.get('perpage', default=5)
+        page = request.query_params.get('page', default=1)
+        idOrder = request.query_params.get('id') 
+
+        if idOrder is not None:
             try:
-                order = CustomOrder.objects.get(id=pk)
-                serializer = CustomServiceOrderSerializer(order)
+                order = CustomOrder.objects.get(id=idOrder)
+                serializer = ServiceOrderSerializer(order)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except CustomOrder.DoesNotExist:
                 return Response({"message": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
             orders = CustomOrder.objects.select_related(
                 'customer').all().filter(typeOrder=True)
-            to_order_date = request.query_params.get('order_date')
-            to_date_measure = request.query_params.get('date_measure')
-            category = request.query_params.get('category')
-            customer = request.query_params.get('customer')
-            to_print = request.query_params.get('print')
-            perpage = request.query_params.get('perpage', default=5)
-            page = request.query_params.get('page', default=1)
 
             if customer:
                 orders.filter(
@@ -528,15 +536,17 @@ class CustomServiceOrderAPIView(APIView):
             if category:
                 orders.filter(
                     category=category
-                )
-            if to_order_date:
-                orders = DateUtils.handleObjectDate(
-                    orders, to_order_date, "order_date", to_date_measure)
+                ) 
+                
+            if datelimitleft:
+                orders = orders.filter(order_date__gte=datelimitleft)
+            if datelimitright:
+                orders = orders.filter(order_date__lte=datelimitright)
+
             count = len(orders)
 
             orders = ClassPagination.customize(perpage, page, orders)
-            serializer = CustomServiceOrderSerializer(orders, many=True)
-            total_amountAll = 0
+            serializer = ServiceOrderSerializer(orders, many=True)
             locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
             current_date = datetime.now().strftime("%A %d %B %Y")
 
@@ -546,57 +556,10 @@ class CustomServiceOrderAPIView(APIView):
                 "current_date": current_date
             }
 
-            if to_print == "True":
-
-                # {% for item in orders %}
-                # <tr>
-                #     {% for itemService in item.order_service_items %}
-                #     <td>{{ forloop.counter }}</td>
-                #     <td>{{item.order_date}}</td>
-                #     <td>{{item.customer.name}}</td>
-                #     <td>${{item.itemService.description}}</td>
-                #     <td>${{item.itemService.total_price}}</td>
-                #     <td>${{item.itemService.total_price}}</td>
-                #     {% endfor %}
-                # </tr>
-                # {% endfor %}
-                result = []
-                total_amountAll = 0
-                for item in orders:
-                    for itemService in item.order_service_items.all():
-                        total_amountAll += itemService.total_price
-                        result.append(
-                            {
-                                "order_date": item.order_date,
-                                "customer": item.customer.name,
-                                "description": itemService.description,
-                                "total_price": itemService.total_price
-                            }
-                        )
-                # Load the HTML template
-                template = get_template('reports/result_unit_services.html')
-
-                # Construct the base URL for static files
-                base_url = request.build_absolute_uri(settings.STATIC_URL)
-
-                # we add to the content the baseurl value
-                html_content = template.render(
-                    {"orders": result, "count": count, "total_amountAll": total_amountAll, "current_date": current_date, "base_url": base_url})
-
-                # Generate PDF using WeasyPrint
-                pdf_file = HTML(string=html_content,
-                                base_url=base_url).write_pdf()
-
-                # Create and return the PDF response
-                response = HttpResponse(
-                    pdf_file, content_type='application/pdf')
-                response['Content-Disposition'] = 'filename="etatVente.pdf"'
-                return response
-
         return Response(context, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
-        serializer = CustomServiceOrderSerializer(data=request.data)
+        serializer = ServiceOrderSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -908,10 +871,14 @@ def ordering(request):
                 isCustomerToDelete.delete()
             serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status.HTTP_201_CREATED)
-    if request.method == 'DELETE':
-        idOrder = request.query_params.get('idOrder')
-        OrderToDelete = CustomOrder.objects.filter(pk=idOrder).get()
-        OrderItem.objects.filter(customerOrder=OrderToDelete).all().delete()
+    if request.method == 'DELETE': 
+        print('have you been here?')
+        idOrder = request.query_params.get('idOrder')        
+        OrderToDelete = CustomOrder.objects.filter(pk=idOrder).get() 
+        if (OrderToDelete.typeOrder==False):
+            OrderItem.objects.filter(customerOrder=OrderToDelete).all().delete() 
+        else:
+            ServiceOrderItem.objects.filter(customerOrder=OrderToDelete).all().delete()  
         OrderToDelete.delete()
         return Response({'Delete': f'Order#{OrderToDelete.id} deleted successfully '}, status.HTTP_202_ACCEPTED)
     if request.method == 'PUT':
@@ -1025,7 +992,7 @@ def report_print(request, pk):
         except CustomOrder.DoesNotExist:
             return Response({"message": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
         if typeOrder.lower() == 'true':
-            customerOrder = CustomServiceOrderSerializer(order)
+            customerOrder = ServiceOrderSerializer(order)
             orderToReport = customerOrder.data
         else:
             customerOrder = CustomOrderSerializer(order)

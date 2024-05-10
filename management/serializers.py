@@ -82,15 +82,18 @@ class CustomSerializer(serializers.ModelSerializer):
 
     def get_orders(self, obj):
         orders = obj.order_Purchased.all()
-        ordersItems = CustomOrderItem.objects.all()
+        ordersItems = OrderItem.objects.all()
+        ServiceordersItems = ServiceOrderItem.objects.all()
         for eachOrder in orders:
-            customerTotal = ordersItems.filter(customerOrder=eachOrder).aggregate(
-                answer=Sum(F('quantity')*F('unit_price'))
-            )
+            if eachOrder.typeOrder == False:
+                customerTotal = ordersItems.filter(customerOrder=eachOrder).aggregate(
+                    answer=Sum(F('quantity')*F('unit_price'))
+                )
+            else:
+                customerTotal = ServiceordersItems.filter(customerOrder=eachOrder).aggregate(
+                    answer=Sum('total_price'))
             eachOrder.total_amount = customerTotal['answer']
             eachOrder.save()
-            # print("total " + str(eachOrder.total_amount) + str("answer :") +
-            #       str(customerTotal['answer']) + str("order : ") + str(eachOrder.id))
 
         serialized_orders = CustomOrderSerializerStructureCustomer(
             orders, many=True
@@ -127,35 +130,38 @@ class OrderItemSerializer(serializers.ModelSerializer):
                   'unit_price', 'quantity',  'get_total_price')
 
 
-class CustomServiceOrderItemSerializer(serializers.ModelSerializer):
+class ServiceOrderItemSerializer(serializers.ModelSerializer):
     # category = CategorySerializer()
+    category = CategorySerializer(read_only=True, many=False)
+    category_id = serializers.IntegerField(write_only=True)
 
     class Meta:
-        model = CustomServiceOrderItem
-        fields = ('category', 'total_price', 'description')
+        model = ServiceOrderItem
+        fields = ('id', 'category', 'category_id',
+                  'total_price', 'description')
+
+        def delete(self, validated_data):
+            raise ('try again')
 
 
-class CustomServiceOrderSerializer(serializers.ModelSerializer):
+class ServiceOrderSerializer(serializers.ModelSerializer):
     # Use 'order_items' instead of 'items'
-    order_service_items = CustomServiceOrderItemSerializer(many=True)
-    customer = CustomSerializer(many=False, read_only=True)
-    customer_id = serializers.PrimaryKeyRelatedField(
-        queryset=Customer.objects.all(), write_only=True)  # Add customer_id field
+    order_service_items = ServiceOrderItemSerializer(many=True)
+    customer = CustomSerializer(read_only=True, many=False)
+    customer_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = CustomOrder
-        fields = ('id', 'customer', 'customer_id', 'order_date', 'typeOrder', 'formatted_order_date',
-                  'order_service_items', 'total_amount', 'deadline')
+        fields = ('id', 'customer', "customer_id", 'total_amount', 'order_date', 'typeOrder', 'formatted_order_date',
+                  'order_service_items', 'deadline')
 
     def create(self, validated_data):
         order_items_data = validated_data.pop(
             "order_service_items")  # Use 'order_service_items' here as well
-        total_amount = validated_data.pop(
-            "total_amount")
-
+        total_amount = 0
         for item in order_items_data:
             if float(item.get('total_price')) > 0:
-                total_amount += item.get('total_price')
+                total_amount += float(item.get('total_price'))
             else:
                 raise ("The amount of each orderitem must be more than 1 dollar")
 
@@ -163,7 +169,7 @@ class CustomServiceOrderSerializer(serializers.ModelSerializer):
             **validated_data, total_amount=total_amount, typeOrder=True)
 
         for order_item in order_items_data:
-            CustomServiceOrderItem.objects.create(
+            ServiceOrderItem.objects.create(
                 customerOrder=order, **order_item)
         return order
 
@@ -200,6 +206,8 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
 # This function contains the productPurchased instead
+
+
 class CustomOrderSerializer(serializers.ModelSerializer):
     # Use 'order_service_items' instead of 'items'
     order_items = CustomOrderItemSerializer(many=True)
@@ -230,7 +238,8 @@ class CustomOrderSerializer(serializers.ModelSerializer):
         order = CustomOrder.objects.create(**validated_data)
 
         for order_item in order_items_data:
-            CustomOrderItem.objects.create(customerOrder=order, **order_item)
+            CustomOrderItem.objects.create(
+                customerOrder=order, **order_item, typeOrder=False)
         return order
 
     # def update(self, instance, validated_data):
@@ -266,7 +275,7 @@ class CustomOrderSerializer(serializers.ModelSerializer):
 
 class PaymentOrderSerializer(serializers.ModelSerializer):
     purchase_order_id = serializers.IntegerField(write_only=True)
-    purchase_order = CustomServiceOrderSerializer(read_only=True)
+    purchase_order = ServiceOrderSerializer(read_only=True)
 
     class Meta:
         model = Payment

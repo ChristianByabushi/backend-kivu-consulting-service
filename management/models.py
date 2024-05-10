@@ -177,12 +177,11 @@ class OrderItem(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=3)
     unit_price = models.DecimalField(max_digits=10, decimal_places=3)
     description = models.TextField(blank=True, null=True)
-
+    
     def computeSmallTotal(self):
         return round(self.unit_price * self.quantity, 3)
 
-
-class CustomServiceOrderItem(models.Model):
+class ServiceOrderItem(models.Model):
     customerOrder = models.ForeignKey(
         CustomOrder, models.CASCADE, related_name='order_service_items'
     )

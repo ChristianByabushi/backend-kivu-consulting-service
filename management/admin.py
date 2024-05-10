@@ -4,7 +4,7 @@ from .models import *
 admin.site.register(CustomUser) 
 admin.site.register(Customer) 
 admin.site.register(CustomOrderItem)
-admin.site.register(CustomServiceOrderItem)
+admin.site.register(ServiceOrderItem)
 admin.site.register(CustomOrder)
 admin.site.register(Category) 
 admin.site.register(Product) 
