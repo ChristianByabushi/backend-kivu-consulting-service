@@ -58,19 +58,31 @@
             </tr>
         </thead>
         <tbody>
+            {% if typeOrder == False %}
+
             {% for item in orderItems %}
+
+
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td style="text-align: center;">{{item.product.name}}</td>
+                <td style="text-align: center; width: 60%;">{{item.product.name}}</td>
                 <td>{{item.unit_price}}</td>
-                {% if typeOrder == False %}
                 <td>${{item.quantity}}</td>
-                {% endif %}
                 <td>${{ item.computeSmallTotal}}</td>
             </tr>
             {% endfor %}
 
+            {% else %}
 
+            {% for item in serviceOrderItems %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td style="text-align: left; width: 60%;">{{item.description}}</td>
+                <td>{{item.total_price}}</td>
+                <td>${{ item.total_price}}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
 
         </tbody>
     </table>

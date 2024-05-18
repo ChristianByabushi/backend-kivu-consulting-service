@@ -181,68 +181,60 @@ class PaymentsOrderAPIView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request, pk=None, format=None):
-        if pk is not None:
-            try:
-                payment = Payment.objects.get(id=pk)
-                serializer = PaymentOrderSerializer(payment)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except Payment.DoesNotExist:
-                return Response({"message": "Payement Order not found"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            payments = Payment.objects.all()
-            to_date_measure = request.query_params.get('date_measure')
-            payment_date = request.query_params.get('payment_date')
-            customer_id = request.query_params.get('customer_id')
-            perpage = request.query_params.get('perpage', default=5)
-            page = request.query_params.get('page', default=1)
+        orderDateFrom = request.query_params.get('orderDateFrom')
+        orderDateTo = request.query_params.get('orderDateTo') 
+        print(orderDateFrom)
+        client_id = request.query_params.get('client_id')
+        perpage = request.query_params.get('perpage', default=5)
+        page = request.query_params.get('page', default=1)
 
-            # if the client has been selected
-            if customer_id:
-                customOrder = get_object_or_404(
-                    CustomOrder, customer__id=customer_id)
-                payments = payments.filter(customerOrder=customOrder)
+        if int(perpage) < 1:
+            perpage = 1
+        # Filter order clients based on query parameters
+        orderClients = CustomOrder.objects.select_related('customer').prefetch_related(
+            'payment_set')  # Pre-fetch related data
+        if orderDateFrom:
+            orderClients = orderClients.filter(order_date__gte=orderDateFrom)
+        if orderDateTo:
+            orderClients = orderClients.filter(order_date__lte=orderDateTo)
+        if client_id:
+            print('here')
+            orderClients = orderClients.filter(customer__id=client_id)
+        print(client_id)            
 
-            if payment_date:
-                selected_date = datetime.strptime(
-                    payment_date, "%Y-%m-%d").date()
-                if to_date_measure == "week":
-                    start_date, end_date = DateUtils.get_week_date(
-                        selected_date)
-                    payments = payments.filter(
-                        Q(payment_date__gte=start_date) & Q(
-                            payment_date__lte=end_date)
-                    )
-                elif to_date_measure == "month":
-                    first_date_of_month, last_day_of_month = DateUtils.get_month_date(
-                        selected_date)
-                    payments = payments.filter(
-                        Q(payment_date__gte=first_date_of_month) & Q(
-                            payment_date__lte=last_day_of_month)
-                    )
-                elif to_date_measure == "year":
-                    year = datetime.strptime(payment_date, "%Y-%m-%d").year
-                    payments = payments.filter(
-                        payment_date__year=year
-                    )
-                elif to_date_measure == "day":
-                    payments = payments.filter(
-                        Q(order_date__day=selected_date.day) & Q(
-                            payment_date__year=selected_date.year) & Q(payment_date__month=selected_date.month)
-                    )
-                else:
-                    payments = payments.filter(
-                        Q(payment_date__day__gte=selected_date.day) & Q(
-                            payment_date__month__gte=selected_date.month)
-                        & Q(payment_date__year__gte=selected_date.year)
-                    )
-            count = len(payments)
+        orderPayments = []
+        for orderClient in orderClients:
+            orderPayment = orderClient.payment_set.aggregate(
+                payed_amount=Sum('amount_paid', output_field=FloatField()))
+            payments_data = PaymentOrderSerializer(
+                orderClient.payment_set, many=True).data  # Serialize payments in bulk
 
-            payments = ClassPagination.customize(perpage, page, payments)
-            serializer = PaymentOrderSerializer(payments, many=True)
+            if not orderPayment['payed_amount']:
+                orderPayment['payed_amount'] = 0
 
-            return Response({"payments": serializer.data,
-                            "count": count
-                             }, status=status.HTTP_200_OK)
+            if orderClient.typeOrder == False:
+                orderPayments.append(
+                    {'paidAmountOrder': orderPayment['payed_amount'],
+                     'PayementsOfClient': payments_data,
+                     'orderPayment': OrderSerializer(orderClient).data})
+            else:
+                orderPayments.append(
+                    {'paidAmountOrder': orderPayment['payed_amount'],
+                     'PayementsOfClient': payments_data,
+                     'orderPayment': ServiceOrderSerializer(orderClient).data})
+        count = len(orderPayments)
+        paginator = Paginator(orderPayments, perpage)
+        if int(page) > paginator.num_pages:
+            page = paginator.num_pages
+        page_obj = paginator.get_page(page)
+        orderPayments = list(page_obj)
+
+        context = {
+            "count": count,
+            "orders": orderPayments
+        }
+
+        return Response(context, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         serializer = PaymentOrderSerializer(data=request.data)
@@ -319,37 +311,48 @@ def payment_analysis(request):
 @api_view(["GET"])
 @permission_classes([permissions.IsAdminUser])
 def get_order_state(request, order_id):
+    # Load the HTML template
+    template = get_template('reports/order.html')
+    # Construct the base URL for static files
+    base_url = request.build_absolute_uri(settings.STATIC_URL)
     to_date_measure = request.query_params.get('date_measure')
     customer_id = request.query_params.get('customer_id')
     to_order_date = request.query_params.get('order_date')
-    to_print = request.query_params.get('print')
+    typeOrder = request.query_params.get('typeOrder')
     # Consider only orders which are pratically of store's type
-    order = CustomOrder.objects.filter(typeOrder=False).get(id=order_id)
-
     if customer_id:
         orders = orders.filter(customer__id=customer_id)
     if to_order_date:
         orders = DateUtils.handleObjectDate(
             orders, to_order_date, "order_date", to_date_measure)
 
-    # Collect all items linked to that order.
-    orderItems = OrderItem.objects.filter(customerOrder__id=order_id)
+    if typeOrder == False:
+        order = CustomOrder.objects.filter(typeOrder=False).get(id=order_id)
 
-    # All costs of the order
-    totalCost = round(
-        sum([item.unit_price * item.quantity for item in orderItems]), 3)
+        # Collect all items linked to that order.
+        orderItems = OrderItem.objects.filter(customerOrder__id=order_id)
+        # All costs of the order
+        totalCost = round(
+            sum([item.unit_price * item.quantity for item in orderItems]), 3)
 
-    # Load the HTML template
-    template = get_template('reports/order.html')
-
-    # Construct the base URL for static files
-    base_url = request.build_absolute_uri(settings.STATIC_URL)
-    context = {'order': order,
-               'orderItems': orderItems,
-               'totalCost': totalCost,
-               'totalCostInWords': num2words(totalCost, lang='fr'),
-               'base_url': base_url, 'typeOrder': False}
-    html_content = template.render(context)
+        context = {'order': order,
+                   'orderItems': orderItems,
+                   'totalCost': totalCost,
+                   'totalCostInWords': num2words(totalCost, lang='fr'),
+                   'base_url': base_url, 'typeOrder': False}
+        html_content = template.render(context)
+    else:
+        order = CustomOrder.objects.filter(typeOrder=True).get(id=order_id)
+        serviceOrderItems = ServiceOrderItem.objects.filter(
+            customerOrder__id=order_id)
+        totalCost = round(
+            sum([item.total_price for item in serviceOrderItems]), 3)
+        context = {'order': order,
+                   'serviceOrderItems': serviceOrderItems,
+                   'totalCost': totalCost,
+                   'totalCostInWords': num2words(totalCost, lang='fr'),
+                   'base_url': base_url, 'typeOrder': True}
+        html_content = template.render(context)
 
     # Generate PDF using WeasyPrint
     pdf_file = HTML(string=html_content, base_url=base_url).write_pdf()
@@ -505,18 +508,20 @@ class ServiceOrderItemViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ('description', 'category')
     pagination_class = CustomPageNumberPagination
+    permission_classes = [IsAdminUser]
 
 
 class ServiceOrderAPIView(APIView):
     permission_classes = [IsAdminUser]
-    def get(self, request, format=None): 
+
+    def get(self, request, format=None):
         datelimitleft = request.query_params.get('datelimitleft')
         datelimitright = request.query_params.get('datelimitright')
-        customer = request.query_params.get('customer') 
+        customer = request.query_params.get('customer')
         category = request.query_params.get('category')
         perpage = request.query_params.get('perpage', default=5)
         page = request.query_params.get('page', default=1)
-        idOrder = request.query_params.get('id') 
+        idOrder = request.query_params.get('id')
 
         if idOrder is not None:
             try:
@@ -536,8 +541,8 @@ class ServiceOrderAPIView(APIView):
             if category:
                 orders.filter(
                     category=category
-                ) 
-                
+                )
+
             if datelimitleft:
                 orders = orders.filter(order_date__gte=datelimitleft)
             if datelimitright:
@@ -871,14 +876,16 @@ def ordering(request):
                 isCustomerToDelete.delete()
             serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status.HTTP_201_CREATED)
-    if request.method == 'DELETE': 
+    if request.method == 'DELETE':
         print('have you been here?')
-        idOrder = request.query_params.get('idOrder')        
-        OrderToDelete = CustomOrder.objects.filter(pk=idOrder).get() 
-        if (OrderToDelete.typeOrder==False):
-            OrderItem.objects.filter(customerOrder=OrderToDelete).all().delete() 
+        idOrder = request.query_params.get('idOrder')
+        OrderToDelete = CustomOrder.objects.filter(pk=idOrder).get()
+        if (OrderToDelete.typeOrder == False):
+            OrderItem.objects.filter(
+                customerOrder=OrderToDelete).all().delete()
         else:
-            ServiceOrderItem.objects.filter(customerOrder=OrderToDelete).all().delete()  
+            ServiceOrderItem.objects.filter(
+                customerOrder=OrderToDelete).all().delete()
         OrderToDelete.delete()
         return Response({'Delete': f'Order#{OrderToDelete.id} deleted successfully '}, status.HTTP_202_ACCEPTED)
     if request.method == 'PUT':

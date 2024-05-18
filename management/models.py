@@ -129,7 +129,7 @@ class ProductPurchased(models.Model):
 class CustomOrder(models.Model):
     customer = models.ForeignKey(
         Customer, models.PROTECT, related_name='order_Purchased'
-    )
+    ) 
     created_at = models.DateField(auto_now=True)
     order_date = models.DateField(null=False)
     total_amount = models.DecimalField(max_digits=10,
@@ -203,4 +203,7 @@ class Payment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"Payement for order #{self.purchase_order.id}-{self.amount_paid}"
+        return f"Payement for order #{self.purchase_order.id}-{self.amount_paid}" 
+    
+    def formatted_payment_date(self):
+       return self.payment_date.strftime("%A, %B %d, %Y")

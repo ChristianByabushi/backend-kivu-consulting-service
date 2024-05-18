@@ -134,19 +134,44 @@ class ServiceOrderItemSerializer(serializers.ModelSerializer):
     # category = CategorySerializer()
     category = CategorySerializer(read_only=True, many=False)
     category_id = serializers.IntegerField(write_only=True)
+    customerOrder_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = ServiceOrderItem
+        fields = ('id', 'category', 'customerOrder_id', 'category_id',
+                  'total_price', 'description')
+
+        def delete(self, validated_data):
+            raise ('try again')
+
+    def validate(self, data):
+        customerOrder_id = data.get('customerOrder_id')
+        category_id = data.get('category_id')
+
+        if self.context['request'].method == 'POST':
+            if ServiceOrderItem.objects.filter(customerOrder_id=customerOrder_id, category_id=category_id).exists():
+                raise serializers.ValidationError(
+                    "An entry with the same customerOrder_id and category_id already exists.")
+        if self.context['request'].method == 'PUT':
+            if not ServiceOrderItem.objects.filter(customerOrder_id=customerOrder_id, category_id=category_id).exists():
+                raise serializers.ValidationError(
+                    "The category specified does no longer exists.")
+        return data
+
+
+class ServiceOrderItemSerializerOverridden(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True, many=False)
+    category_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = ServiceOrderItem
         fields = ('id', 'category', 'category_id',
                   'total_price', 'description')
 
-        def delete(self, validated_data):
-            raise ('try again')
-
 
 class ServiceOrderSerializer(serializers.ModelSerializer):
     # Use 'order_items' instead of 'items'
-    order_service_items = ServiceOrderItemSerializer(many=True)
+    order_service_items = ServiceOrderItemSerializerOverridden(many=True)
     customer = CustomSerializer(read_only=True, many=False)
     customer_id = serializers.IntegerField(write_only=True)
 
@@ -279,5 +304,5 @@ class PaymentOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ('purchase_order_id', 'purchase_order',
+        fields = ('id', 'purchase_order_id', 'purchase_order', 'formatted_payment_date',
                   'payment_date', 'amount_paid')
