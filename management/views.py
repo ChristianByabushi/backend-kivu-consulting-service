@@ -1,3 +1,8 @@
+from .serializers import ProductPurchasedSerializer
+from django.core.paginator import Paginator
+from rest_framework.permissions import IsAdminUser
+from rest_framework import status
+import django_filters
 from .models import ProductPurchased
 from django.test import TestCase
 from django.test import Client
@@ -152,29 +157,49 @@ class SupplierViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
 
 
-class ProductFilter(filters.FilterSet):
-    created_at = filters.DateFilter(
-        field_name='created_at', method='filter_created_at')
-
-    def filter_created_at(self, queryset, name, value):
-        # Filtering products purchased on the provided date
-        return queryset.filter(created_at__date=value)
-
-    class Meta:
-        model = ProductPurchased
-        fields = ['product__name', 'created_at']
-
-
-class ProductPurchasedViewSet(viewsets.ModelViewSet):
-    queryset = ProductPurchased.objects.select_related(
-        'supplier', 'product').all().order_by('-created_at')
-    serializer_class = ProductPurchasedSerializer
-    ordering_fields = ['unit_price', 'stock_quantity']
-    search_fields = ['product__name']
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = ProductFilter
-    pagination_class = CustomPageNumberPagination
+class ProductPurchasedAPIView(APIView):
     permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        queryset = ProductPurchased.objects.select_related(
+            'supplier', 'product').all().order_by('-created_at')
+        datefrom = request.query_params.get('datefrom')
+        dateto = request.query_params.get('dateto')
+        perpage = request.query_params.get('perpage', 5)
+        page = request.query_params.get('page', 1)
+        selectedProduct = request.query_params.get('selectedProduct')
+
+        if selectedProduct:
+            queryset = queryset.filter(product__id=selectedProduct)
+        if datefrom:
+            queryset = queryset.filter(created_at__gte=datefrom)
+        if dateto:
+            queryset = queryset.filter(created_at__lte=dateto)
+
+        # Apply pagination
+        paginator = Paginator(queryset, perpage)
+        page_obj = paginator.get_page(page)
+
+        serializer = ProductPurchasedSerializer(page_obj, many=True)
+        return Response({
+            'count': paginator.count,
+            'results': serializer.data
+        })
+
+    def post(self, request, *args, **kwargs):
+        serializer = ProductPurchasedSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        try:
+            product_purchased = ProductPurchased.objects.get(id=pk)
+            product_purchased.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ProductPurchased.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class PaymentsOrderAPIView(APIView):
@@ -182,8 +207,7 @@ class PaymentsOrderAPIView(APIView):
 
     def get(self, request, pk=None, format=None):
         orderDateFrom = request.query_params.get('orderDateFrom')
-        orderDateTo = request.query_params.get('orderDateTo') 
-        print(orderDateFrom)
+        orderDateTo = request.query_params.get('orderDateTo')
         client_id = request.query_params.get('client_id')
         perpage = request.query_params.get('perpage', default=5)
         page = request.query_params.get('page', default=1)
@@ -198,9 +222,7 @@ class PaymentsOrderAPIView(APIView):
         if orderDateTo:
             orderClients = orderClients.filter(order_date__lte=orderDateTo)
         if client_id:
-            print('here')
             orderClients = orderClients.filter(customer__id=client_id)
-        print(client_id)            
 
         orderPayments = []
         for orderClient in orderClients:
@@ -453,6 +475,116 @@ def customer_order_item(request, order_item_id):
 
 @api_view(["GET"])
 @permission_classes([permissions.IsAdminUser])
+def storestatepurchased(request):
+    datefrom = request.query_params.get('datefrom')
+    dateto = request.query_params.get('dateto')
+    selectedProduct = request.query_params.get('selectedProduct')
+    page = request.query_params.get('page')
+    perpage = request.query_params.get('perpage')
+    productsPurchased = ProductPurchased.objects.all()
+    OrderItems = OrderItem.objects
+    if datefrom:
+        OrderItems = OrderItems.filter(created_at__gte=datefrom)
+    if dateto:
+        OrderItems = OrderItems.filter(created_at__lte=dateto)
+    results = []
+    if selectedProduct:
+        OrderItems = OrderItems.filter(
+            product__id=selectedProduct
+        )
+
+    for item in productsPurchased:
+        totalQty = productsPurchased.filter(
+            product__id=item.id
+        ).aggregate(answer=Sum('stock_quantity'))
+
+        quantitySold = OrderItems.filter(
+            product__id=item.id
+        ).aggregate(answer=Sum('quantity'))
+
+        results.append(
+            {
+                "product": ProductSerializer(item.product, many=False).data,
+                "totalQty": totalQty['answer'],
+                "quantitySold": quantitySold['answer'],
+            }
+        )
+
+        context = {
+            "results": results,
+            "count": len(results)
+        }
+
+    return Response(context, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAdminUser])
+def storestate(request):
+    datefrom = request.query_params.get('datefrom')
+    dateto = request.query_params.get('dateto')
+    selectedProduct = request.query_params.get('selectedProduct')
+    methodValueStore = request.query_params.get('methodValueStore')
+    productsPurchased = ProductPurchased.objects.all()
+    OrderItems = OrderItem.objects
+    if datefrom:
+        OrderItems = OrderItems.filter(
+            customerOrder__order_date__gte=datefrom,
+        )
+
+    if selectedProduct:
+        OrderItems = OrderItems.filter(
+            product__id=selectedProduct
+        )
+
+    if dateto:
+        OrderItems = OrderItems.filter(
+            customerOrder__order_date__lte=dateto
+        )
+
+    orderItemLeavingCost = []
+
+    for orderitem in OrderItems.all():
+        storeremaining = orderitem.quantity
+        itemsProd = []
+        if (methodValueStore == 'FIFO'):
+            itemsProd = productsPurchased.filter(
+                product=orderitem.product, created_at__lte=orderitem.customerOrder.order_date).all().order_by('created_at')
+        else:
+            itemsProd = productsPurchased.filter(
+                product=orderitem.product, created_at__lte=orderitem.customerOrder.order_date).all()
+
+        itemsLength = itemsProd.count()
+        orderItemsLeaving = []
+        while (storeremaining > 0 and itemsLength > -1):
+            left = itemsProd[itemsLength-1].stock_quantity - storeremaining
+            if (left > 0):
+                orderItemsLeaving.append(
+                    {'qty': storeremaining, "itemPropurchased": itemsProd[itemsLength-1].id, 'unit_price': itemsProd[itemsLength-1].unit_price})
+                storeremaining -= storeremaining
+                break
+            else:
+                orderItemsLeaving.append(
+                    {'qty': itemsProd[itemsLength-1].stock_quantity,
+                     'unit_price': itemsProd[itemsLength-1].unit_price})
+                storeremaining -= itemsProd[itemsLength-1].stock_quantity
+            itemsLength -= 1
+        serialized_orderitem = OrderItemSerializer(orderitem).data
+        orderItemLeavingCost.append({
+            'orderitem': serialized_orderitem,
+            'leavingCostItems': orderItemsLeaving
+        })
+    context = {
+        "orderItemLeavingCost": orderItemLeavingCost,
+        'productsPurchased': ProductPurchasedSerializer(productsPurchased, many=True).data,
+        "count": len(orderItemLeavingCost)
+    }
+
+    return Response(context, status=status.HTTP_200_OK)
+
+
+@ api_view(["GET"])
+@ permission_classes([permissions.IsAdminUser])
 def products_analysis(request):
     to_category = request.query_params.get('category')
     to_date_measure = request.query_params.get('date_measure')
@@ -596,7 +728,7 @@ class CustomerOrderViewset(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
 
 
-@transaction.atomic
+@ transaction.atomic
 @ api_view(["GET", "PUT", "DELETE", "POST"])
 @ permission_classes([permissions.IsAdminUser])
 def custom_ordering(request):
@@ -716,9 +848,9 @@ def custom_ordering(request):
         return Response(serializer.data, status.HTTP_201_CREATED)
 
 
-@transaction.atomic
-@api_view(["PUT", "DELETE"])
-@permission_classes([permissions.IsAdminUser])
+@ transaction.atomic
+@ api_view(["PUT", "DELETE"])
+@ permission_classes([permissions.IsAdminUser])
 def orderItemModification(request, order_id):
     # Pull up the product whose orderItem is
     orderItem = OrderItem.objects.filter(pk=order_id).get()
@@ -877,7 +1009,6 @@ def ordering(request):
             serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status.HTTP_201_CREATED)
     if request.method == 'DELETE':
-        print('have you been here?')
         idOrder = request.query_params.get('idOrder')
         OrderToDelete = CustomOrder.objects.filter(pk=idOrder).get()
         if (OrderToDelete.typeOrder == False):
@@ -900,7 +1031,6 @@ def ordering(request):
         OrderToEdit.order_date = date
         OrderToEdit.save()
         OrderToEdit = CustomOrder.objects.filter(pk=idOrder).get()
-        print(OrderToEdit.deadline)
         return Response({'Edit': f'Order#{OrderToEdit.id} edited successfully '}, status.HTTP_200_OK)
 
 

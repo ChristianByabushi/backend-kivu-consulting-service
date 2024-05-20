@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
 # Application definition
 
 CORS_ALLOWED_ORIGINS = [
@@ -159,7 +160,8 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+#I care don't care about zone time
+USE_TZ = False
 
 # CUSTOM MODEL
 AUTH_USER_MODEL = "management.CustomUser"

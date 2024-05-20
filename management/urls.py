@@ -16,10 +16,8 @@ router.register(r"customers", views.CustomerViewset, basename="customer")
 # router.register(r"custom-ordering", views.CustomerOrderViewset,
 #                 basename="ordering")
 router.register(r'order-item-service', views.ServiceOrderItemViewSet,
-                basename="order-item-service"), 
+                basename="order-item-service"),
 
-router.register(r"products-purchased",
-                views.ProductPurchasedViewSet, basename="product-purchased")
 
 urlpatterns = [
     path("", include(router.urls)),
@@ -28,9 +26,10 @@ urlpatterns = [
 
     path('ordering/', views.ordering, name="ordering"),
 
-    #path('custom-ordering/<int:pk>/', views.CustomOrderAPIView.as_view()),
+    # path('custom-ordering/<int:pk>/', views.CustomOrderAPIView.as_view()),
 
     #          name='customordering'),
+
 
     path('orders-service/', views.ServiceOrderAPIView.as_view(),
          name='orders-service'),
@@ -40,6 +39,13 @@ urlpatterns = [
 
     path('payment-order/', views.PaymentsOrderAPIView.as_view(),
          name='payment-order-list'),
+
+    path('products-purchased/', views.ProductPurchasedAPIView.as_view(),
+         name='productspurchased'),
+
+    path('products-purchased/<int:pk>/', views.ProductPurchasedAPIView.as_view(),
+         name='products-purchased-pk'),
+
 
     path('payment-order/<int:pk>/', views.PaymentsOrderAPIView.as_view(),
          name='payment-order-detail'),
@@ -55,6 +61,12 @@ urlpatterns = [
 
     path('order-state/<int:order_id>/', views.get_order_state,
          name="order_state"),
+
+    path('store-state/', views.storestate,
+         name="store_state"),
+    
+    path('store-state-purchased/', views.storestatepurchased,
+         name="store_state"),
 
     path('order-item/<int:order_id>/', views.orderItemModification,
          name="order_item"),

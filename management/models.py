@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from datetime import datetime
 from num2words import num2words
+from django.utils.dateformat import format
 
 
 class CustomUser(AbstractUser, PermissionsMixin):
@@ -122,14 +123,19 @@ class ProductPurchased(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField(auto_now=True)
 
+
+
     def __str__(self):
         return f"ProductPurchased : #{self.id} - {self.product.name}"
+
+    def readable_created_at(self):
+        return format(self.created_at, 'Y-m-d H:i:s')
 
 
 class CustomOrder(models.Model):
     customer = models.ForeignKey(
         Customer, models.PROTECT, related_name='order_Purchased'
-    ) 
+    )
     created_at = models.DateField(auto_now=True)
     order_date = models.DateField(null=False)
     total_amount = models.DecimalField(max_digits=10,
@@ -177,9 +183,20 @@ class OrderItem(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=3)
     unit_price = models.DecimalField(max_digits=10, decimal_places=3)
     description = models.TextField(blank=True, null=True)
-    
+
+    def __str__(self):
+        return f"OrderItem#{self.id}--units"
+
+    def get_total_price(self):
+        answer = self.unit_price * self.quantity
+        return "{:.3f}".format(answer)
+
     def computeSmallTotal(self):
         return round(self.unit_price * self.quantity, 3)
+
+    def returnOrderDate(self):
+        return self.customerOrder.order_date
+
 
 class ServiceOrderItem(models.Model):
     customerOrder = models.ForeignKey(
@@ -203,7 +220,7 @@ class Payment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"Payement for order #{self.purchase_order.id}-{self.amount_paid}" 
-    
+        return f"Payement for order #{self.purchase_order.id}-{self.amount_paid}"
+
     def formatted_payment_date(self):
-       return self.payment_date.strftime("%A, %B %d, %Y")
+        return self.payment_date.strftime("%A, %B %d, %Y")

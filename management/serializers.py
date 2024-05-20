@@ -47,7 +47,8 @@ class ProductPurchasedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductPurchased
-        fields = '__all__'
+        fields = ('id', "product", 'unit_price', 'stock_quantity', 'product_id',
+                  'supplier_id', 'supplier', 'created_at', 'updated_at', 'readable_created_at')
 
 
 class SupplierSerializer(serializers.ModelSerializer):
@@ -125,8 +126,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(write_only=True)
 
     class Meta:
-        model = CustomOrderItem
-        fields = ('id', 'product', "product_id", "description",
+        model = OrderItem
+        fields = ('id', 'returnOrderDate', 'product', "product_id", "description",
                   'unit_price', 'quantity',  'get_total_price')
 
 
