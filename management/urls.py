@@ -64,10 +64,16 @@ urlpatterns = [
 
     path('store-state/', views.storestate,
          name="store_state"),
-    
+
     path('store-state-purchased/', views.storestatepurchased,
          name="store_state"),
 
     path('order-item/<int:order_id>/', views.orderItemModification,
          name="order_item"),
+
+    path('static-analysis/', views.staticanalysis,
+         name="static_analysis"),
+
+    path('dashboard-results/', views.dashboardresults, name='dashboard-results') 
+    
 ]

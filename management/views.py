@@ -1,3 +1,5 @@
+from datetime import datetime as datetimeconverter
+from datetime import date
 from .serializers import ProductPurchasedSerializer
 from django.core.paginator import Paginator
 from rest_framework.permissions import IsAdminUser
@@ -6,7 +8,6 @@ import django_filters
 from .models import ProductPurchased
 from django.test import TestCase
 from django.test import Client
-import datetime
 import json
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -80,14 +81,15 @@ class DateUtils(TestCase):
     def handleObjectDate(objects, value_date_received, datefield, to_date_measure):
         selected_date = datetime.strptime(
             value_date_received, "%Y-%m-%d").date()
-        if to_date_measure == "week":
+        if to_date_measure == "Week":
             start_date, end_date = DateUtils.get_week_date(selected_date)
             query_filter = (
                 Q(**{f"{datefield}__gte": start_date}) &
                 Q(**{f"{datefield}__lte": end_date})
             )
+
             objects = objects.filter(query_filter)
-        elif to_date_measure == "month":
+        elif to_date_measure == "Month":
             first_date_of_month, last_day_of_month = DateUtils.get_month_date(
                 selected_date)
 
@@ -97,7 +99,7 @@ class DateUtils(TestCase):
             )
             objects = objects.filter(query_filter)
 
-        elif to_date_measure == "year":
+        elif to_date_measure == "Year":
             year = datetime.strptime(value_date_received, "%Y-%m-%d").year
             query_filter = (
                 Q(**{f"{datefield}__year": year})
@@ -105,7 +107,7 @@ class DateUtils(TestCase):
 
             objects = objects.filter(query_filter)
 
-        elif to_date_measure == "day":
+        elif to_date_measure == "Day":
             query_filter = (
                 Q(**{f"{datefield}__day": selected_date.day}) &
                 Q(**{f"{datefield}__year": selected_date.year}) &
@@ -214,6 +216,7 @@ class PaymentsOrderAPIView(APIView):
 
         if int(perpage) < 1:
             perpage = 1
+
         # Filter order clients based on query parameters
         orderClients = CustomOrder.objects.select_related('customer').prefetch_related(
             'payment_set')  # Pre-fetch related data
@@ -332,6 +335,13 @@ def payment_analysis(request):
 
 @api_view(["GET"])
 @permission_classes([permissions.IsAdminUser])
+def staticanalysis(request):
+
+    return 0
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAdminUser])
 def get_order_state(request, order_id):
     # Load the HTML template
     template = get_template('reports/order.html')
@@ -347,16 +357,13 @@ def get_order_state(request, order_id):
     if to_order_date:
         orders = DateUtils.handleObjectDate(
             orders, to_order_date, "order_date", to_date_measure)
-
-    if typeOrder == False:
+    if typeOrder == 'False':
         order = CustomOrder.objects.filter(typeOrder=False).get(id=order_id)
-
         # Collect all items linked to that order.
         orderItems = OrderItem.objects.filter(customerOrder__id=order_id)
         # All costs of the order
         totalCost = round(
             sum([item.unit_price * item.quantity for item in orderItems]), 3)
-
         context = {'order': order,
                    'orderItems': orderItems,
                    'totalCost': totalCost,
@@ -385,9 +392,148 @@ def get_order_state(request, order_id):
 
     return response
 
+def get_month_name(month_number):
+  """
+  Returns the full month name for a given integer (1-12).
+  """
+  if 1 <= month_number <= 12:
+    month_names = ["January", "February", "March", "April", "May", "June",
+                   "July", "August", "September", "October", "November", "December"]
+    return month_names[month_number - 1]
+  else:
+    raise ValueError("Invalid month number. Please provide a number between 1 and 12.")
+
 
 @api_view(["GET"])
 @permission_classes([permissions.IsAdminUser])
+def dashboardresults(request):
+    periodfilter = request.query_params.get('periodfilter')
+    filterDate = request.query_params.get('filterDate')
+    # Arranged according to the today's date
+    orderClients = CustomOrder.objects.all()
+    todaySdate = date.today().strftime("%Y-%m-%d") 
+    print(filterDate)
+    if periodfilter == 'Week':
+        orderClients = DateUtils.handleObjectDate(
+            orderClients, filterDate, 'order_date', periodfilter)
+    elif periodfilter == 'Month':
+        orderClients = DateUtils.handleObjectDate(
+            orderClients, filterDate, 'order_date', periodfilter)
+    elif periodfilter == 'Year':
+        orderClients = DateUtils.handleObjectDate(
+            orderClients, todaySdate, 'order_date', periodfilter)
+    else:
+        orderClients = DateUtils.handleObjectDate(
+            orderClients, filterDate, 'order_date', "Day")
+    totalOrderPayments = 0
+    costOfCostOrders = 0
+    for orderClient in orderClients:
+        costPaymentOrder = Payment.objects.filter(purchase_order=orderClient).aggregate(
+            answer=Sum('amount_paid')
+        )
+        if not costPaymentOrder['answer']:
+            costPaymentOrder['answer'] = 0
+        totalOrderPayments += costPaymentOrder['answer']
+        if orderClient.typeOrder == False:
+            costOrder = OrderItem.objects.filter(customerOrder=orderClient).aggregate(
+                answer=Sum(F('quantity') * F('unit_price')))
+        else:
+            costOrder = ServiceOrderItem.objects.filter(customerOrder=orderClient).aggregate(
+                answer=Sum('total_price')
+            )
+        if not costOrder['answer']:
+            costOrder['answer'] = 0
+        costOfCostOrders += costOrder['answer']
+
+    productsPurchased = ProductPurchased.objects.all()
+
+    products = Product.objects.all()
+
+    storestateItems = []
+
+    for product in products:
+        # analyze the purchasement
+        # we cheak how many fields have already been sold
+        productPurchased = productsPurchased.filter(
+            product__id=product.id
+        ).aggregate(quantityAlreadyPurchased=Sum('stock_quantity'),
+                    countTimesPurchased=Count('id'),
+
+                    averageUnitPrice=Sum(
+            F('unit_price') * F('stock_quantity')) / Sum('stock_quantity')
+        )
+
+        productSold = OrderItem.objects.filter(product=product).aggregate(
+            answer=Sum('quantity')
+        )
+
+        remainingQuantity = productPurchased['quantityAlreadyPurchased'] - \
+            productSold['answer']
+
+        storestateItems.append({
+            "product": ProductSerializer(product, many=False).data,
+            "totalQuantity":  productPurchased['quantityAlreadyPurchased'],
+            "remainingQuantity": remainingQuantity,
+            "countTimesPurchased": productPurchased['countTimesPurchased']
+        })
+
+    recentsServices = ServiceOrderItem.objects.all().order_by('-id')[:2]
+
+    
+    # Year expenses, debts, revenus
+    yearByFilter = datetimeconverter.strptime(
+        filterDate, '%Y-%m-%d').strftime("%Y")  
+    
+    monthyAnalysisData = []
+    for number in range(1, 13):
+        payments = 0
+        costPaymentOrder = Payment.objects.filter(payment_date__year=yearByFilter, payment_date__month=number).aggregate(
+            answer=Sum('amount_paid')
+        )
+
+        if not costPaymentOrder['answer']:
+            costPaymentOrder['answer'] = 0
+
+        costOrdersMonth = OrderItem.objects.filter(customerOrder__order_date__year=yearByFilter, customerOrder__order_date__month=number).aggregate(
+            answer=Sum(F('quantity') * F('unit_price')))
+
+        if not costOrdersMonth['answer']:
+            costOrdersMonth['answer'] = 0
+
+        costServiceOrdersMonth = ServiceOrderItem.objects.filter(customerOrder__order_date__year=yearByFilter, customerOrder__order_date__month=number).aggregate(
+            answer=Sum('total_price')
+        )
+
+        if not costServiceOrdersMonth['answer']:
+            costServiceOrdersMonth['answer'] = 0
+
+        costOrderMonth = costServiceOrdersMonth['answer'] + \
+            costOrdersMonth['answer']
+        difference = abs(costOrderMonth - costPaymentOrder['answer'])
+        monthyAnalysisData.append(
+            {
+                "costOrderMonth": costOrderMonth,
+                "costPaymentOrder": costPaymentOrder['answer'],
+                "Difference": difference,
+                "Month": get_month_name(number)
+            }
+        )
+
+    context = {
+        "totalOrderDebts": costOfCostOrders-totalOrderPayments,
+        "Payments": totalOrderPayments,
+        'costOfCostOrders': costOfCostOrders,
+        "clients":  orderClients.values('customer_id').distinct().count(),
+        'storestateItems': storestateItems,
+        "recentsServices": ServiceOrderItemSerializer(recentsServices, many=True).data,
+        "monthyAnalysisData": monthyAnalysisData
+    }
+
+    return Response(context, status=status.HTTP_200_OK)
+
+
+@ api_view(["GET"])
+@ permission_classes([permissions.IsAdminUser])
 def customer_order_item(request, order_item_id):
     to_date_measure = request.query_params.get('date_measure')
     customer = request.query_params.get('customer')
@@ -473,28 +619,30 @@ def customer_order_item(request, order_item_id):
     return Response(content, status=status.HTTP_200_OK)
 
 
-@api_view(["GET"])
-@permission_classes([permissions.IsAdminUser])
+@ api_view(["GET"])
+@ permission_classes([permissions.IsAdminUser])
 def storestatepurchased(request):
     datefrom = request.query_params.get('datefrom')
     dateto = request.query_params.get('dateto')
     selectedProduct = request.query_params.get('selectedProduct')
     page = request.query_params.get('page')
     perpage = request.query_params.get('perpage')
-    productsPurchased = ProductPurchased.objects.all()
-    OrderItems = OrderItem.objects
+    products = Product.objects.all()
+    len(products)
+    OrderItems = OrderItem.objects.all()
     if datefrom:
-        OrderItems = OrderItems.filter(created_at__gte=datefrom)
+        OrderItems = OrderItems.filter(customerOrder__created_at__gte=datefrom)
     if dateto:
-        OrderItems = OrderItems.filter(created_at__lte=dateto)
+        OrderItems = OrderItems.filter(customerOrder__created_at__lte=dateto)
     results = []
+
     if selectedProduct:
         OrderItems = OrderItems.filter(
             product__id=selectedProduct
         )
 
-    for item in productsPurchased:
-        totalQty = productsPurchased.filter(
+    for item in products:
+        totalQty = ProductPurchased.objects.filter(
             product__id=item.id
         ).aggregate(answer=Sum('stock_quantity'))
 
@@ -504,22 +652,28 @@ def storestatepurchased(request):
 
         results.append(
             {
-                "product": ProductSerializer(item.product, many=False).data,
+                "product": ProductSerializer(item, many=False).data,
                 "totalQty": totalQty['answer'],
                 "quantitySold": quantitySold['answer'],
             }
         )
 
+        # Apply pagination
+        # Use 10 as default if perpage is not provided
+        perpage_int = int(perpage) if perpage else 10
+        paginator = Paginator(results, perpage_int)
+        page_obj = paginator.get_page(page)
+
         context = {
-            "results": results,
-            "count": len(results)
+            "results": page_obj.object_list,
+            "count": paginator.count
         }
 
     return Response(context, status=status.HTTP_200_OK)
 
 
-@api_view(["GET"])
-@permission_classes([permissions.IsAdminUser])
+@ api_view(["GET"])
+@ permission_classes([permissions.IsAdminUser])
 def storestate(request):
     datefrom = request.query_params.get('datefrom')
     dateto = request.query_params.get('dateto')
@@ -574,6 +728,7 @@ def storestate(request):
             'orderitem': serialized_orderitem,
             'leavingCostItems': orderItemsLeaving
         })
+
     context = {
         "orderItemLeavingCost": orderItemLeavingCost,
         'productsPurchased': ProductPurchasedSerializer(productsPurchased, many=True).data,
