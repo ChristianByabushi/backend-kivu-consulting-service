@@ -1,0 +1,165 @@
+{% extends "../core/index.html" %} {% load static %} {% block content %}
+<div class="container">
+    <div class="page-inner">
+        <div class="page-header mb-0">
+            <h3 class="fw-bold mb-1">Gestion comptes utilisateurs</h3>
+            <ul class="breadcrumbs mb-1">
+                <li class="nav-home">
+                    <a href="#">
+                        <i class="icon-home"></i>
+                    </a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Groupes</a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Roles</a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Utilisateurs</a>
+                </li>
+            </ul>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-none" style="background-color: inherit;">
+                    <div class="card-body">
+                        <ul class="nav nav-pills nav-secondary nav-pills-no-bd" id="pills-tab-without-border" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'comptes' %} active {% endif%}" href="{% url 'comptes' %}">Utilisateurs
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'groupes' %} active {% endif%}" href='{% url "groupes" %}'>Groupes</a>
+                            </li>
+                           
+                        </ul> 
+                       
+                        <div class="tab-content mt-2 mb-3" id="pills-without-border-tabContent">
+                                {% block gestionComptes %} {% endblock gestionComptes %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<script>
+    $(document).ready(function() {
+        $('input[name="EscontenuPresent"]').on('change', function() {
+            if ($(this).val() === 'True') {
+                $('#textareaContainer').show();
+            } else {
+                $('#textareaContainer').hide();
+            }
+        });
+        $.notify({
+            icon: 'icon-bell',
+            title: "Gestion de l' {{institution.designation}}",
+            message: "Gestion Inscription ",
+        }, {
+            type: 'secondary',
+            placement: {
+                from: "bottom",
+                align: "right"
+            },
+            time: 1000,
+        });
+    });
+
+    $(document).ready(function() {
+        //select for ajout-eleve
+        $('#formInscrireEleve .selectOption').change(function() {
+            var optionId = $(this).val();
+            if (optionId) {
+                $.ajax({
+                    url: '/options/get-classes/' + optionId + '/',
+                    type: 'GET',
+                    success: function(data) {
+                        var parsedData = JSON.parse(data); // Parse the JSON string 
+                        $('#formInscrireEleve .selectClasse').empty();
+                        $('#formInscrireEleve .selectClasse').append('<option value="">Selectionner Classe</option>');
+                        $.each(parsedData, function(index, classe) {
+                            $('#formInscrireEleve select[name=classeEleve]').append('<option value="' + classe.id + '">' + classe.designation + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#formInscrireEleve .selectClasse').empty();
+                $('#formInscrireEleve .selectClasse').append('<option value="">Selectionner Classe</option>');
+            }
+        });
+
+        //select for the index 
+        $('.search-row .selectOption').change(function() {
+            var optionId = $(this).val();
+            if (optionId) {
+                $.ajax({
+                    url: '/options/get-classes/' + optionId + '/',
+                    type: 'GET',
+                    success: function(data) {
+                        var parsedData = JSON.parse(data); // Parse the JSON string 
+                        $('.search-row .selectClasse').empty();
+                        $('.search-row .selectClasse').append('<option value="">Selectionner Classe</option>');
+                        $.each(parsedData, function(index, classe) {
+                            $('.search-row select[name=classeEleve]').append('<option value="' + classe.id + '">' + classe.designation + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('.search-row .selectClasse').empty();
+                $('.search-row .selectClasse').append('<option value="">Selectionner Classe</option>');
+            }
+        });
+
+        //select for modification
+        $('#formEditerEleve .selectOption').change(function() {
+            var optionId = $(this).val();
+            if (optionId) {
+                $.ajax({
+                    url: '/options/get-classes/' + optionId + '/',
+                    type: 'GET',
+                    success: function(data) {
+                        var parsedData = JSON.parse(data); // Parse the JSON string 
+                        $('#formEditerEleve .selectClasse').empty();
+                        $('#formEditerEleve .selectClasse').append('<option value="">Selectionner Classe</option>');
+                        $.each(parsedData, function(index, classe) {
+                            $('#formEditerEleve select[name=classeEleve]').append('<option value="' + classe.id + '">' + classe.designation + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#formEditerEleve .selectClasse').empty();
+                $('#formEditerEleve .selectClasse').append('<option value="">Selectionner Classe</option>');
+            }
+        });
+
+
+
+    });
+</script>
+
+<!-- dropped because of its appearance   -->
+<style>
+
+.footer {
+    border-top: 1px solid #eee;
+    padding: 15px;
+    background: #fff;
+    position: absolute;
+    width: 100%;
+    display: none;
+} 
+
+</style>
+{% endblock content %}

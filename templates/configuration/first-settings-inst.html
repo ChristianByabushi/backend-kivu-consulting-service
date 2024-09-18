@@ -1,0 +1,163 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title text-center">Parametrage de l'institution</div>
+        </div>
+        <div class="card-body mt-0">
+            <form method='POST' id="formInstitution">
+                {% csrf_token %}
+                <div class="row shadow-none border border-secondary form-group">
+                    <h3>Généralités</h3>
+                    <div class=" col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="designationInstitution">Designation</label>
+                            <input required type="text" class="form-control" name="designation" id="designationInstitution" value="{{institution.designation}}" />
+                            <p class="form-text text-muted">
+                                Le nom de l'etablissement 
+                                <input type="text" id="idInstitution" hidden value="{{institution.id}}">
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="postNomEleve">Code</label>
+                            <input required type="text" class="form-control" value="{{institution.code}}"  id="codeInstitution" name="code" /> 
+                            <p class="form-text text-muted">
+                               Exemple, B.P 2454
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="postNomEleve">Adresse</label>
+                            <input required type="text" class="form-control" id="adresseInstitution" value="{{institution.adresse}}" name="adresse"  /> 
+                            <p class="form-text text-muted">
+                                Exemple, Avenue Nyofu N.14, Quartier Nkafu 
+                             </p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="postNomEleve">Commune ou localite</label>
+                            <input required type="text" class="form-control" value="{{institution.commune}}" id="communeInstitution" name="commune" />
+                            <p class="form-text text-muted">
+                                Exemple, Ibanda ou Kabare
+                             </p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="postNomEleve">Ville/Territoire</label>
+                            <input required type="text" class="form-control" value="{{institution.ville}}" id="villeInstitution" name="ville" />
+                            <p class="form-text text-muted">
+                                Exemple: Bukavu
+                             </p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="postNomEleve">Province</label>
+                            <input required type="text" class="form-control" value="{{institution.province}}" name="province" id="lieuNaissanceEleve" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="postNomEleve">Statut</label> 
+                            <select class="form-control form-control" name="statut" id="statutInstitution"> 
+                                <option value="" >Sélectionner le statut</option>
+                                <option value="Prive" {% if institution.statut == 'Prive'  %}  selected    {% endif %} >Privé</option>
+                                <option value="ECC" {% if institution.statut == 'ECC'  %}  selected    {% endif %} >Conventionné Catholique</option>
+                                <option value="ECP" {% if institution.statut == 'ECP'  %}  selected    {% endif %} >Conventionné Protestant</option>
+                                <option value="ECK" {% if institution.statut == 'ECK'  %}  selected    {% endif %} >Conventionné Kimabuguiste</option>
+                                <option value="Autre" {% if institution.statut == 'Autre'  %}  selected    {% endif %} >Autre status</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row shadow-none border border-secondary form-group mt-2">
+                    <h3>Présentation</h3>
+                    <div class="col-md-9 col-12">
+                        <div class="form-group">
+                            <label for="numPerm">Devise</label>
+                            <input required type="text" class="form-control" id="deviseInstitution" value="{{institution.devise}}" name="devise" />
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="form-group">
+                            <label for="logoInstitution">Si vous voulez changer le logo </label>
+                            <input placeholder="cliquez ici"  type="file"  class="form-control" id="logoInstitution" name="logoInstitution" />
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="form-group">
+                            <input type="hidden" id="currentLogo" id="logoPreview" value="{{ institution.get_logo }}">
+                            <label for="numPerm">Vue logo</label>
+                            <img src="{{institution.get_logo}}"  alt="not found" style="max-width: 50px; max-height: 50px; object-fit: cover;" name="logo">
+                        </div>
+                    </div>
+                    <div class="card-footer mt-2 d-flex justify-content-end">
+                        <button class="btn confirmation-btn btn-secondary" type='submit'>Enregistrer la page</button>
+                    </div>
+                </form>
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+
+<script text="text-javascript">
+    $(document).ready(function() {
+
+    $('#logoInstitution').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#logoPreview').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);   
+        }
+    });
+
+    $('#formInstitution').submit(function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        // Create FormData object to collect form data and image file
+        const formData = new FormData(this);
+ 
+        // Get the selected image file
+        const fileInput = $('#logoInstitution')[0];
+        const file = fileInput.files[0];
+        var idinstitution = $('#idInstitution').val()
+        // Append the image file to FormData
+        if (file) {
+            formData.append('logo', file);
+        }
+
+        // Send the FormData to the server using AJAX
+        $.ajax({
+            url: `modifier-data-institution/${idinstitution}/`, 
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                alert('Modification effectuée avec succès'); 
+                window.location.href = '{% url "installationApplication" %}'; 
+            },
+            error: function(error) {
+                alert('Une errreur est survenue');
+            }
+        });
+    });
+});
+
+</script>

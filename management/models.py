@@ -7,15 +7,7 @@ from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from datetime import datetime
 from num2words import num2words
 from django.utils.dateformat import format
-
-
-class CustomUser(AbstractUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    image = models.ImageField(upload_to="uploads/avatar/", blank=True)
-    REQUIRED_FIELDS = ['first_name', "last_name", "email"]
-
-    def __str__(self):
-        return self.username
+from user.models import User
 
 
 class Category(models.Model):
@@ -217,7 +209,7 @@ class Payment(models.Model):
     purchase_order = models.ForeignKey(CustomOrder, on_delete=models.CASCADE)
     payment_date = models.DateTimeField(auto_now_add=True)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=3)
-    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
         return f"Payement for order #{self.purchase_order.id}-{self.amount_paid}"

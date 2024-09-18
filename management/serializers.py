@@ -110,7 +110,6 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ("id", "name", 'description', "slug",
                   "get_absolute_url", "products")
 
-
 class CustomOrderItemSerializer(serializers.ModelSerializer):
     productPurchased = ProductPurchasedSerializer(read_only=True)
     productPurchased_id = serializers.IntegerField(write_only=True)

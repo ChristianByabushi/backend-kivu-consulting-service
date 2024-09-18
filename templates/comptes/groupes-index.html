@@ -1,0 +1,93 @@
+{% extends "./main-comptes.html" %} {% load static %} {% block gestionComptes %}
+<div class='row'>
+    <div class="card overflow-x-auto">
+        <div class="card-header">
+            <div class="row d-flex justify-content-between">
+                <div class="col-md-6 col-4">
+                    <h4>Groupes</h4>
+                </div>
+               
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover" id='tableDesComptes'>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Groupes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for groupe in groupes %}
+                    <tr>
+                        <td>{{ forloop.counter }}
+                        </td>
+                        <td>{{groupe.name}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% include './forms/ajouter-utilisateur.html' %}
+<script text='test-javascript'> 
+$('.launchDeleteModalUtilisateur').click(function() {
+    var itemId = $(this).attr('data-id'); 
+    
+    var content = {};
+    content.icon = "fa fa-bell";
+    content.message = "Utilisateur  supprimée avec succès."
+        // Show confirmation dialog
+    swal({
+        title: "Gestion Eleve-Inscription?",
+        text: "Est ce que vous Voulez vraiment supprimer cette option ",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            // Proceed with deletion if confirmed
+            $.ajax({
+                url: `/users/comptes/${itemId}/supprimer-utilisateur/`,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        swal("Gestion-Compte", {
+                            icon: "success",
+                            buttons: {
+                                confirm: {
+                                    text: "OK",
+                                    value: true,
+                                    visible: true,
+                                    className: "btn btn-success",
+                                    closeModal: true,
+                                },
+                            },
+                            text: "Utilisateur supprimée avec succès!",
+                            type: "info",
+                        }).then(() => {
+                            window.location.href = '{% url 'comptes' %}'; // Redirect to inscription URL
+                        });
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert(`Une erreur s'est produite`);
+                }
+            });
+        } else {
+            swal("Suppression annulée", {
+                icon: "info",
+            });
+        }
+    });
+});
+</script> 
+{% endblock gestionComptes %}

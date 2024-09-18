@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from rest_framework.settings import api_settings
-
 from pathlib import Path
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,6 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+AUTH_USER_MODEL='user.User'
+
+## making weasyprint to work on windows 
 
 # Application definition
 
@@ -48,7 +50,15 @@ INSTALLED_APPS = [
     "djoser",
     "django_filters",
     "corsheaders",
-    "management"
+    'user',
+    "management",
+    'vehicule',
+    'vendors',
+    'location',
+    'approvisionnement',
+    'contract',
+    'payement',
+    'reservation',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,7 +68,9 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', 
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",  #require from 5.1 >
+    
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -66,7 +78,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,6 +90,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -120,7 +133,6 @@ DJOSER = {
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -151,8 +163,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -163,16 +173,12 @@ USE_I18N = True
 #I care don't care about zone time
 USE_TZ = False
 
-# CUSTOM MODEL
-AUTH_USER_MODEL = "management.CustomUser"
-
-
 # The base url for serving media files, which typically include user-uploaded files images, videos...
-MEDIA_URL = "/media/"
+MEDIA_URL = "media/"
 
 
 # absolute filesystem path to the directory
-MEDIA_ROOT = BASE_DIR / "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Static files (CSS, JavaScript, Images)

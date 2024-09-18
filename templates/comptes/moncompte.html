@@ -1,0 +1,56 @@
+{% extends "../core/index.html" %} {% load static %} {% block content %}
+<div class="container">
+    <div class="page-inner">
+        <div class="page-header mb-0">
+            <h3 class="fw-bold mb-1">Mon compte</h3>
+            <ul class="breadcrumbs mb-1">
+                <li class="nav-home">
+                    <a href="#">
+                        <i class="icon-home"></i>
+                    </a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Profile</a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Parametrage</a>
+                </li>
+              
+            </ul>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs nav-line nav-color-secondary" id="line-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="line-home-tab" data-bs-toggle="pill" href="#line-home" role="tab" aria-controls="pills-home" aria-selected="true">Profile Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="line-profile-tab" data-bs-toggle="pill" href="#line-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Edit Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="line-contact-tab" data-bs-toggle="pill" href="#line-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Changer mot de passe</a>
+                </li>
+            </ul>
+            <div class="tab-content mt-3 mb-3" id="line-tabContent">
+                <div class="tab-pane fade show active" id="line-home" role="tabpanel" aria-labelledby="line-home-tab">
+                    {% include './forms/tab-profile-details.html' %}
+                </div>
+                <div class="tab-pane fade" id="line-profile" role="tabpanel" aria-labelledby="line-profile-tab">
+                    {% include './forms/tab-edit-profile.html' %}
+                   
+                </div>
+                <div class="tab-pane fade" id="line-contact" role="tabpanel" aria-labelledby="line-contact-tab">
+                    {% include './forms/tab-mot-passe-changer.html' %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock content %}

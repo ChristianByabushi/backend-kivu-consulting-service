@@ -1,0 +1,37 @@
+<div class="mt-4 profildeDetails" style="min-height: 500px;">
+
+    <div class="row">
+        <div class="">  
+            <img style="max-width: 100px; max-height: 100px;"  src="{{user.get_avatar_url}}" class="img-fluid img-circle rounded-circle" alt="">
+        </div>
+        <div class=""> 
+            <h5>Nom d'utilisateur : <span> {{user.login}}   </span>  </h5>
+            <h5>Noms : <span> {{user.noms}}   </span>  </h5>
+            <h5>Role : <span>{{user.role}}</span></h5> 
+            <h5>Groupes :
+                 <ol style="margin-left: 5px;">
+                    {% for group in user.groups.all %}
+                    <li> <span> {{ group.name }}</span> </li>
+                 {% endfor %} 
+                  </ol>
+            </h5>
+                
+                {% if listesClasses %}
+                    <h5> Titulaire en : 
+                    <ol style="margin-left: 5px;">
+                        {% for classe in listesClasses  %}
+                        <li><span>{{classe.designation}} {{classe.option.designation}}</span></li>
+                        {% endfor %}
+                    </ol>
+                </h5>
+
+                {% endif %}
+        </div> 
+    </div>
+</div>
+
+<style>
+.profildeDetails span{
+    color: rgb(75, 75, 197);
+}
+</style>

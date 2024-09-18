@@ -1,0 +1,175 @@
+<!-- addOption Modal -->
+<div class="modal fade" id="editerUtilisateur" tabindex="-1 " role="dialog " aria-hidden="true">
+    <div class="modal-dialog " role="document ">
+        <div class="modal-content ">
+            <div class="modal-header border-0 ">
+                    <h5 class="modal-title ">
+                        <span class="fw-mediumbold "> Modification</span>
+                        <span class="fw-light "> du compte utilisateur </span>
+                    </h5>
+                    <button type="button " class="close" data-dismiss="modal " aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            
+                <div class="modal-body">
+                    <p class="small "> <span id="idUserEdit" hidden></span>
+                      Les informations sur l'utilisateur sont écrits ici en bas :
+                    </p>
+                    <form id="formEditerUtilisateur">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group form-group-default ">
+                                    <label>Nom utilisateur</label>
+                                    <input id="loginEditUtilisateur" required name="login" type="text" class="form-control " />
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group form-group-default ">
+                                    <label>Prenom Nom Post-nom</label>
+                                    <input id="nomsEditUtilisateur" required name="noms" type="text" class="form-control " />
+                                </div>
+                            </div>
+                             <div class="col-12">
+                                    <div class="form-group">
+                                      <label for="">Selectionner Role</label>
+                                      <select class="form-control" name="roleEditUtilisateur" id="roleEditUtilisateur">
+                                        <option value='enseignant'>Enseignant</option>
+                                        <option value='proviseur'>Proviseur</option>
+                                        <option value='bibliothecaire'>Bibliothecaire</option>
+                                        <option value='secretaire'>Secretaire</option>
+                                      </select>
+                                    </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                                <div class="form-group form-group-default ">
+                                    <label>Groupes</label>
+                                    <div class="form-group">
+                                        <div class="selectgroup selectgroup-pills parentGroupName"> 
+                                        {% for groupe in groupes  %}
+                                          <label class="selectgroup-item">
+                                            <input
+                                              type="checkbox"
+                                              name="{{groupe.id}}"
+                                              value="{{groupe.id}}"
+                                              class="selectgroup-input groupeUtilisateur"
+                                            />
+                                            <span class="selectgroup-button">{{groupe.name}}</span>
+                                          </label>
+                                        {% endfor %}
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group form-group-default">
+                                    <label class="alert-info">Pour le mot de passe, vous ne pouvez <br> que le réinitialiser, si l'utilisateur l'a oublie!!!</label>
+                                </div>
+                            </div> 
+                            
+                        </div>
+                        <div class="row" style="margin-right: 10px;">
+                            <div class="modal-footer border-0">
+                                <button type="button " class="btn btn-danger" id="submitCanceledModifierUtilisateur"> Annuler </button>
+                                <button type="submit" class="btn btn-secondary">  Modifier </button>
+                            </div> 
+                         </div> 
+                    </form>
+                </div>
+        </div>
+    </div>
+</div>
+<script text="text/javascript">  
+
+    $('#submitCanceledModifierUtilisateur').on('click', function(event) {
+        event.preventDefault();
+        $("#editerUtilisateur").modal('hide');
+    }) 
+
+    $('#formEditerUtilisateur').on('submit', function(event) {
+            event.preventDefault();  
+
+            var login = $('#loginEditUtilisateur').val()
+            var noms = $('#nomsEditUtilisateur').val()
+            var role = $('#roleEditUtilisateur').val()  
+            var itemId = $('#idUserEdit').val()
+            var selectedGroups = []; 
+
+            $('.parentGroupName .groupeUtilisateur:checked').each(function() {
+              selectedGroups.push($(this).val());
+            }); 
+          
+                $.ajax({
+                url: `/users/comptes/${itemId}/modifier-utilisateur/`, 
+                type: 'POST',
+                data: {
+                    'login':login,
+                    'noms':noms,
+                    'role':role,
+                    'groups':  JSON.stringify(selectedGroups),
+                },
+          
+            success: function(response) {
+                if (response.success) {
+                    swal("Gestion-Comptes", {
+                        icon: "",
+                        buttons: {
+                            confirm: {
+                                text: "Okay",
+                                value: true,
+                                visible: true,
+                                className: "btn btn-success",
+                                closeModal: true,
+                            },
+                        },
+                        text: "Infos de l'utilisateur modifiées avec succès !",
+                        type: "info",
+                    }).then(() => {
+                        window.location.href = '{% url 'comptes' %}'; // Redirect to classe URL
+                    });
+                } else {
+                    alert(response.message)
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Une erreur est parvenue')
+
+            }
+        });
+    });
+
+    $(".launchEditModalUtilisateur").on('click', function(){
+        var itemId = $(this).attr('data-id'); 
+        
+        $('#idUserEdit').val(itemId) 
+
+            $.ajax({
+                    url: `/users/comptes/${itemId}/get-utilisateur/` , // Update this with the correct URL
+                    type: 'GET',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success==true) {  
+                            utilisateur = response.utilisateur
+                            $('#loginEditUtilisateur').val(`${utilisateur.login}`)
+                            $('#nomsEditUtilisateur').val(`${utilisateur.noms}`)
+                            $('#roleEditUtilisateur').val(`${utilisateur.role}`)  
+                           utilisateur.groups.forEach(groupe => {  $(`.parentGroupName input[name=${groupe.id}]`).prop('checked', true);});
+                           
+                        }
+                
+            }
+        });
+        
+
+    })
+
+
+</script>
+

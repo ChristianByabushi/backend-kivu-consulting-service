@@ -24,7 +24,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django.shortcuts import get_object_or_404
 from num2words import num2words
-from weasyprint import HTML
+# from weasyprint import HTML
 from django.db import transaction
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
@@ -47,6 +47,8 @@ from rest_framework.decorators import (
 
 from django_filters import rest_framework as filters
 # Create your views here.
+
+import os
 
 
 class ClassPagination:

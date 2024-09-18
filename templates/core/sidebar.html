@@ -1,0 +1,117 @@
+{% load static %}
+
+<!-- Sidebar -->
+<div class="sidebar" data-background-color="dark">
+    <div class="sidebar-logo">
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="dark">
+            <a href="{% url 'index' %}" class="logo">
+                <img alt="notfound" class="d-none d-lg-none" src="{% static 'assets/img/logokcs.jpg' %}"
+                    style="max-width: 30px; max-height: 30px; object-fit: cover;" />
+                <h3 class="mt-1 text-white" style="padding-left: 0px;">Gari-app KCS</h3>
+            </a>
+            <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                    <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                    <i class="gg-menu-left"></i>
+                </button>
+            </div>
+            <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+            </button>
+        </div>
+        <!-- End Logo Header -->
+    </div>
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+                <li
+                    class="nav-item {% if request.resolver_match.url_name == 'index' %} active{% endif%}{% if request.resolver_match.url_name == 'index' %} active{% endif%} ">
+                    <a href="{% url 'index' %}">
+                        <i class="fa fa-home" aria-hidden="true"></i>
+                        <p>Accueil</p>
+                    </a>
+                </li>
+
+
+                <li class="nav-item">
+                    <style>
+                        .active-sublink span {
+                            color: white
+                        }
+                    </style>
+                    <a data-bs-toggle="collapse" href="#sidebarLayoutVehicules" class="
+                    {% if request.resolver_match.url_name == 'vehicules' %}active-sublink{% endif%} 
+                    {% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%} 
+                    
+                    ">
+                        <i class="fa fa-bus" aria-hidden="true"></i>
+                        <p>Garage</p>
+                        <span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="sidebarLayoutVehicules">
+                        <ul class="nav nav-collapse">
+                            <li>
+                                <a href="{% url 'vehicules' %}"
+                                    class="{% if request.resolver_match.url_name == 'vehicules' %}active-sublink{% endif%}">
+                                    <span class="sub-item">Vehicules</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'marques' %}"
+                                    class="{% if request.resolver_match.url_name == 'vehicules' %}active-sublink{% endif%}">
+                                    <span class="sub-item">Marques</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {% if 'Administration' in groups %}
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">Gestion Parametres</h4>
+                </li>
+
+                <li
+                    class="nav-item {% if request.resolver_match.url_name == 'comptes' %} active{% endif%}{% if request.resolver_match.url_name == 'groupes' %} active{% endif%} ">
+                    <a data-bs-toggle="collapse" href="#tables">
+                        <i class="fas fa-table"></i>
+                        <p>Comptes</p>
+                        <span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="tables">
+                        <ul class="nav nav-collapse">
+                            <li>
+                                <a href='{% url "comptes" %}'
+                                    class="{% if request.resolver_match.url_name == 'comptes' %}active-sublink{% endif%}">
+                                    <span class="sub-item">Comptes</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href='{% url "groupes" %}'
+                                    class="{% if request.resolver_match.url_name == 'groupes' %}active-sublink{% endif%}">
+                                    <span class="sub-item">Groupes</span>
+                                </a>
+                            </li>
+                            <li
+                                class="nav-item {% if request.resolver_match.url_name == 'institution' %} active{% endif%}{% if request.resolver_match.url_name == 'groupes' %} active{% endif%} ">
+                                <a href="{% url 'institution' %}">
+                                    <i class="fas fa-school"></i>
+                                    <p>Institution</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<!-- End Sidebar -->

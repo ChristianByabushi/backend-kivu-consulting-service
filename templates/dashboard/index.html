@@ -1,0 +1,236 @@
+{% extends "../core/index.html" %} {% load static %} {% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+      <div>
+        <h3 class="fw-bold mb-3">Tableau de bord</h3>
+        <h6 class="op-7 mb-2">{{institution.designation}}</h6>
+      </div>
+      <div class="ms-md-auto py-2 py-md-0">
+        <p id="currentDateTime"></p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-primary bubble-shadow-small">
+                  <i class="fas fa-users"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category" title="personnel dans le systeme">Personnel</p>
+                  <h4 class="card-title">{{nombresPersonnelDanslesyteme}}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-info bubble-shadow-small">
+                  <i class="fa fa-user-astronaut" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Eleves</p>
+                  <h4 class="card-title">{{nombresElevesInscriptAnneeEncours}}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-success bubble-shadow-small">
+                  <i class="fas fa-luggage-cart"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Options</p>
+                  <h4 class="card-title">{{nombreOptions}}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-secondary bubble-shadow-small">
+                  <i class="fas fa-school fa-xs"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Classes</p>
+                  <h4 class="card-title">{{nbreClasses}}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-head-row">
+              <div class="card-title">Eleves statistiques</div>
+              <div class="card-tools">
+                <a href="" class="btn btn-label-success btn-round btn-sm me-2">
+                  <span class="btn-label">
+                    <i class="fa fa-pencil"></i>
+                  </span> Voir plus
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <table class="table table-hover" id="statistiques-table">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2">#</th>
+                  <th scope="col" rowspan="2">Classe</th>
+                  <th scope="col" rowspan="2">Option</th>
+                  <th scope="col" rowspan="2">Nbre Eleve Inscrits</th>
+                  <th scope="col" colspan="2" class="text-center">Genre</th>
+                </tr>
+                <tr>
+                  <th scope="col">Masculin</th>
+                  <th scope="col">Feminin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for element in statistiques %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{element.nomDelaClasse}}</td>
+                  <td>{{element.Option}}</td>
+                  <td class='text-center'>{{element.nombreInscrit}}</td>
+                  <td class='text-center'>{{element.masculin_count}}</td>
+                  <td class='text-center'>{{element.feminin_count}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="card ">
+          <div class="card-header">
+            <div class="card-head-row">
+              <div class="card-title">Options</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <table class="table table-hover" id='options-table'>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Option</th>
+                        <th scope="col" class='text-center'>Nbre des classes</th>
+                        <th scope="col" class='text-center'>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for element in options %}
+                    <tr>
+                        <td>{{ forloop.counter }}
+                        </td>
+                        <td>{{element.optionObject.designation}}</td>
+                        <td class='text-center'>{{element.nombreClasse}}</td>
+                        <td class='text-center'>{{element.optionObject.type_option}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#statistiques-table').DataTable(
+
+    )
+  });
+
+  $(document).ready(function() {
+    $('#options-table').DataTable(
+
+    )
+  });
+</script>
+<script text="text-javascript">
+  $(document).ready(function () {
+    $.notify(
+      {
+        icon: "icon-bell",
+        title:
+          "Bienvenue Monsieur {{request.user.noms}}, nous vous souhaitons bon travail <br> Devise: {{institution.devise}}",
+        message: "Role:{{request.user.role}} ",
+      },
+      {
+        type: "secondary",
+        placement: {
+          from: "bottom",
+          align: "right",
+        },
+        time: 1000,
+      }
+    );
+    function updateCurrentTime() {
+      // Get the current date and time
+      const currentDate = new Date();
+
+      // Format the date and time as desired
+      const formattedDate = currentDate.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+      });
+
+      // Update the paragraph with the formatted date and time
+      $("#currentDateTime").html(
+        `<span class='text-secondary'> ${formattedDate} </span>`
+      );
+    }
+
+    // Update the time every second
+    setInterval(updateCurrentTime, 1000);
+
+    // Initial update
+    updateCurrentTime();
+  });
+</script>
+
+{% endblock content %}

@@ -1,0 +1,127 @@
+<form id="editProfileUtilisateur" style="min-height: 500px;">
+    {% csrf_token %}
+    <h5>Editer votre profile en complentant les donnees suivants</h5>
+
+    <div class="row">
+        <div class="row">
+            <div class="col-6">
+                <div class="col-12 d-flex justify-content-center">
+                    <img src="{{user.get_avatar_url}}" style="max-width: 280px; max-height: 150px;" class=" img-fluid img-circle rounded-circle"  alt="not yet set" srcset="">
+                 </div>
+                 <div class="col-12">
+                    <div class="form-group d-flex">
+                    <label for="photoDeprofil"><i class="fas fa-edit mt-3"></i></label>
+                    <input placeholder="cliquez ici"  type="file"  class="form-control" id="photoDeprofil" name="photoDeprofil" />
+                </div>
+            </div>
+       
+                <div class="col-12">
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input type="text" required class="form-control" value="{{user.login}}" name="login" id="login"
+                            aria-describedby="helpId" placeholder="{{user.login}}">
+                        <small id="helpId" class="form-text text-muted">Si vous changez votre nom d'utilisateur, il
+                            devra
+                            etre different de tous les autres existant dans le systeme</small>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input required type="text" value="{{user.noms}}" class="form-control" name="noms" id="noms"
+                            aria-describedby="helpId" placeholder="Nom d'utilisateur">
+                        <small id="helpId" class="form-text text-muted">Rassurez vous que le nom est complet, Prenom,
+                            nom et
+                            post-nom</small>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <input required type="password" class="form-control" name="pwd" id="pwdEditProfile"
+                            aria-describedby="helpId" placeholder="Mot de passe">
+                    </div>
+                </div>
+                <div class="col-12 mx-3 mt-4">
+                    <button type="submit" class="btn btn-secondary">Changer</button>
+                </div>
+    
+            </div>
+        </div>
+
+
+    </div>
+</form>
+
+<script text="text-javacript">
+    $('#editProfileUtilisateur').on('submit', function (event) {
+
+                // Create FormData object to collect form data and image file
+const formData = new FormData(this);
+ 
+ // Get the selected image file
+ const fileInput = $('#photoDeprofil')[0];
+ const file = fileInput.files[0]; 
+ 
+ // Append the image file to FormData
+    if (file) {
+        formData.append('avatar', file);
+    } 
+
+    formData.append('noms', $('#noms').val(),);
+    formData.append('pwd', $('#pwdEditProfile').val(),);
+    formData.append('login', $('#login').val(),);
+
+        event.preventDefault()
+        swal({
+            title: "Gestion Compte?",
+            text: "Est ce que vous Voulez vraiment modifier les informations de votre compte ?",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        }).then((willDelete) => {
+            if (willDelete) {
+                $.ajax({
+                    type: "POST",
+                    url: '/users/mon-compte/edit/',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            swal("Gestion-Option", {
+                                icon: "success",
+                                buttons: {
+                                    confirm: {
+                                        text: "OK",
+                                        value: true,
+                                        visible: true,
+                                        className: "btn btn-success",
+                                        closeModal: true,
+                                    },
+                                },
+                                text: "Modification du compte effectuee  avec succès !",
+                                type: "info",
+                            }).then(() => {
+                                window.location.href = "{% url 'Moncompte' %}"; // Redirect to inscription URL
+                            });
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            } else {
+                swal("Operation de modification annulée", {
+                    icon: "info",
+                });
+            }
+        });
+
+
+
+
+    })
+
+</script>

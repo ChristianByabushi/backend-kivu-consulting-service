@@ -1,0 +1,114 @@
+<form id="formAjouterUtilisateur">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group form-group-default ">
+                <label>Nom utilisateur</label>
+                <input id="loginUtilisateur" required name="login" type="text" class="form-control " />
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="form-group form-group-default ">
+                <label>Prenom Nom Post-nom</label>
+                <input id="nomsUtilisateur" required name="noms" type="text" class="form-control " />
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="form-group form-group-default ">
+                <label>Mot de passe par defaut</label>
+                <input id="passwordDefaut" type='password' required name="passwordDefaut" type="text" class="form-control "/>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="form-group form-group-default ">
+                <label>Confirmation le mot de passe</label>
+                <input id="confirmpasswordDefaut" type='password' name="confirmpasswordDefaut" type="text" class="form-control "/>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="modal-footer border-0">
+            <div class="card-footer d-flex justify-content-end" style="margin-right: 10px;">
+                <button class="btn confirmation-btn btn-secondary" type='submit'>Enregistrer la page</button>
+            </div>
+        </div> 
+     </div> 
+     <div class="col-md-12 col-12" hidden>
+        <div class="form-group form-group-default ">
+            <label>Groupes</label>
+            <div class="form-group">
+                <div class="selectgroup selectgroup-pills"> 
+                {% for groupe in groupes  %}
+                  <label class="selectgroup-item">
+                    <input 
+                      checked
+                      type="checkbox"
+                      name="{{groupe.id}}"
+                      value="{{groupe.id}}"
+                      class="selectgroup-input groupeUtilisateur"
+                    />
+                    <span class="selectgroup-button">{{groupe.name}}</span>
+                  </label>
+                {% endfor %}
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+</form> 
+
+<script text="text-javacript"> 
+    $('#formAjouterUtilisateur').on('submit', function(event) {
+            event.preventDefault();  
+            var login = $('#loginUtilisateur').val()
+            var noms = $('#nomsUtilisateur').val()
+            var password = $('#passwordDefaut').val()   
+            var confirmpasswordDefaut = $('#confirmpasswordDefaut').val()
+            if (!password==confirmpasswordDefaut){
+                    alert('Mots de passe non correspondants')
+                    return false
+            }
+
+            var selectedGroups = [];
+            $('.groupeUtilisateur:checked').each(function() {
+              selectedGroups.push($(this).val());
+            }); 
+          
+                $.ajax({
+                url: "{% url 'ajouterUtilisateur' %} ", 
+                type: 'POST',
+                data: {
+                    'login':login,
+                    'noms':noms,
+                    'role':'Prefet',
+                    'groups':selectedGroups,
+                    'password':password,
+                    csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
+                },
+            success: function(response) {
+                if (response.success) {
+                    swal("Gestion-Comptes", {
+                        icon: "",
+                        buttons: {
+                            confirm: {
+                                text: "Okay",
+                                value: true,
+                                visible: true,
+                                className: "btn btn-success",
+                                closeModal: true,
+                            },
+                        },
+                        text: "Utilisateur créée avec succès !",
+                        type: "info",
+                    })
+                } else {
+                    alert(response.message)
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Une erreur est parvenue')
+
+            }
+        });
+    });
+</script>

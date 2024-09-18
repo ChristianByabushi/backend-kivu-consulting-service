@@ -1,0 +1,190 @@
+{% extends "./main-comptes.html" %} {% load static %} {% block gestionComptes %}
+<div class='row'>
+    <div class="card overflow-x-auto">
+        <div class="card-header">
+            <div class="row d-flex justify-content-between">
+                <div class="col-md-6 col-4">
+                    <h4>Comptes</h4>
+                </div>
+                <div class="col-md-6 col-4 text-end">
+                    <button class="btn btn-primary btn-round" data-bs-toggle="modal" data-bs-target="#addUtilisateur">
+                        <i class="fa fa-plus" title='ajouter une nouvelle option option'></i> Ajouter Utilisateur
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover" id='tableDesComptes'>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Nom Utilisateur</th>
+                        <th scope="col">Noms</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Groupes</th>
+                        <th scope="col" class='text-center'>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for utilisateur in utilisateurs %}
+                    <tr>
+                        <td>{{ forloop.counter }}
+                        </td>
+                        <td>{{utilisateur.login}}</td>
+                        <td>{{utilisateur.noms}}</td>
+                        <td>{{utilisateur.role}}</td>
+                        <td>
+                            <span> {% for group in utilisateur.groups.all %}
+                                  {{ group.name }}
+                                   
+                               {% if not forloop.last %} , {% endif %} {% endfor %} </span>
+                        </td>
+                        <td class='text-center'>
+                            <button class="btn btn-primary btn-sm  ms-auto launchEditModalUtilisateur" data-bs-target="#editerUtilisateur" data-bs-toggle="modal" 
+                            data-id="{{utilisateur.id}}" >
+                            <i class="fa fa-edit text-light"></i>
+                        </button>
+                    <button class="btn btn-danger btn-sm launchDeleteModalUtilisateur" data-id="{{ utilisateur.id }}" >
+                        <i class="fa fa-trash text-light"></i>  
+                    </button>
+
+
+                    <button class="btn btn-warning btn-sm launchResetPasswordModalUtilisateur" data-id="{{ utilisateur.id }}" data-bs-toggle="modal" data-bs-target="#resetPasswordModal" 
+                    data-nom-utilisateur='{{utilisateur.noms}}'
+                    >
+                        <i class="fa fa-lock-open text-light"></i>  </button>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resetPasswordModalLabel">Réinitialiser le mot de passe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="resetPasswordForm">
+            <input type="hidden" name="user_id" id="resetUserId">
+            <div class="mb-3"> 
+
+              <label for="confirmReset" class="form-label">Êtes-vous sûr de vouloir réinitialiser le mot de passe de l'utilisateur <span id="idUtilisateurResetPwd" hidden></span> <span class="nomsUtilisateur"> </span> ?</label>
+<br>
+              <label class="alert-secondary">Apres la reinitialisation le mot de passe   par defaut sera <span class="text-danger">changemoi</span></label>
+            </div>
+            <button type="submit" id="btnSubmitReinitialiserPWD" class="btn btn-danger" style='margin-right:5px'>Réinitialiser</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{% include './forms/ajouter-utilisateur.html' %}
+{% include './forms/editer-utilisateur.html' %}
+<script text='test-javascript'>  
+    $('#tableDesComptes').DataTable()
+$('.launchResetPasswordModalUtilisateur').click(function(){
+    var nomsUtilisateur = $(this).attr('data-nom-utilisateur'); 
+    var idUtilisateurResetPwd = $(this).attr('data-id'); 
+    $('#idUtilisateurResetPwd').val(idUtilisateurResetPwd)
+    $('.nomsUtilisateur').html(nomsUtilisateur)
+})
+
+$('#btnSubmitReinitialiserPWD').on('click', function(event){ 
+
+    event.preventDefault()
+   var itemId= $('#idUtilisateurResetPwd').val()
+    $.ajax({
+        type: "POST",
+        url: `/users/comptes/${itemId}/reinitialiser-mot-de-passe-utilisateur/`,
+        success: function (response) {
+            swal("Gestion-Comptes", {
+                                icon: "success",
+                                buttons: {
+                                    confirm: {
+                                        text: "OK",
+                                        value: true,
+                                        visible: true,
+                                        className: "btn btn-success",
+                                        closeModal: true,
+                                    },
+                                },
+                                text: "Mot de passe reinitialisé avec succès !",
+                                type: "info",
+                            }).then(() => {
+                                window.location.href = '{% url 'comptes' %}'; // Redirect to inscription URL
+                            });
+        }
+    });
+})
+
+$('.launchDeleteModalUtilisateur').click(function() {
+    var itemId = $(this).attr('data-id'); 
+    
+    var content = {};
+    content.icon = "fa fa-bell";
+    content.message = "Utilisateur  supprimée avec succès."
+        // Show confirmation dialog
+    swal({
+        title: "Gestion Eleve-Inscription?",
+        text: "Est ce que vous Voulez vraiment supprimer cette option ",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            // Proceed with deletion if confirmed
+            $.ajax({
+                url: `/users/comptes/${itemId}/supprimer-utilisateur/`,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        swal("Gestion-Compte", {
+                            icon: "success",
+                            buttons: {
+                                confirm: {
+                                    text: "OK",
+                                    value: true,
+                                    visible: true,
+                                    className: "btn btn-success",
+                                    closeModal: true,
+                                },
+                            },
+                            text: "Utilisateur supprimée avec succès!",
+                            type: "info",
+                        }).then(() => {
+                            window.location.href = '{% url 'comptes' %}'; // Redirect to inscription URL
+                        });
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert(`Une erreur s'est produite`);
+                }
+            });
+        } else {
+            swal("Suppression annulée", {
+                icon: "info",
+            });
+        }
+    });
+});
+</script> 
+
+{% endblock gestionComptes %}
+

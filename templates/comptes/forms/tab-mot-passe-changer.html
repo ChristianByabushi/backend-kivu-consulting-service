@@ -1,0 +1,95 @@
+<form id="editPwdUtilisateur" style="min-height: 500px;">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-6">
+            
+    <div class="row">
+
+        <h5>Modifier le mot de passe</h5>
+        <div class="col-12">
+            <div class="form-group">
+        <label for=""></label>
+        <input type="password"
+            class="form-control" required  name="ancienPwd" id="ancienPwd" aria-describedby="helpId" placeholder="ancien mot de passe">
+        <small id="helpId" class="form-text text-muted">Entrez le mot de passe que vous utilisez pour vous connecter</small>
+        </div> 
+        </div>
+        <div class="col-12">
+            <div class="form-group">
+            <label for=""></label>
+            <input type="password" required
+            class="form-control"  name="nouveauPwd" id="nouveauPwd" aria-describedby="helpId" placeholder="Nouveau mot de passe">
+            <small id="helpId" class="form-text text-muted">Entrez maintenant le nouveau</small>
+        </div> 
+        <div class="col-12">
+            <div class="form-group">
+            <label for=""></label>
+            <input type="password" required 
+            class="form-control"  name="ConfirmnouveauPwd" id="ConfirmnouveauPwd" aria-describedby="helpId" placeholder="Confirmer  mot de passe">
+            <small id="helpId" class="form-text text-muted">Confirmer le nouveau mot de passe</small>
+            </div> 
+        </div>
+        <div class="col-12 justify-content-center d-flex ">
+            <button type="submit" class="btn btn-secondary">Changer le mot de passe</button>
+        </div>
+    </div>
+</div>
+</div>
+</form>
+
+<script text="text-javacript">
+    $("#editPwdUtilisateur").on('submit', function (event) {
+        event.preventDefault()
+       var ancienPwd =  $('#ancienPwd').val()
+       var nouveauPwd =  $('#nouveauPwd').val()
+       var confirmnouveauPwd =  $('#ConfirmnouveauPwd').val()
+
+
+        if(nouveauPwd!=confirmnouveauPwd){
+            alert('mot de passe non conforme') 
+            return false
+        }
+
+
+        $.ajax({
+                type: "POST",
+                url: '/users/mon-compte/changer-mot-passe/',
+                data: {
+                    'ancienPwd':ancienPwd,
+                    'nouveauPwd':nouveauPwd,
+                    'confirmnouveauPwd':confirmnouveauPwd
+                },                    
+                headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+
+                    success: function(response) {
+                        if (response.success) {
+                            swal("Gestion-Option", {
+                                icon: "success",
+                                buttons: {
+                                    confirm: {
+                                        text: "OK",
+                                        value: true,
+                                        visible: true,
+                                        className: "btn btn-success",
+                                        closeModal: true,
+                                    },
+                                },
+                                text: "Mot de passe modifiee avec succes !",
+                                type: "info",
+                            }).then(() => {
+                                window.location.href = '{% url 'login' %}'; // Redirect to inscription URL
+                            });
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                })
+        });
+
+
+</script>

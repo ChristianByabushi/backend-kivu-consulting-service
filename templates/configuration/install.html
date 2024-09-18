@@ -1,0 +1,85 @@
+{% include '../composants/header.html' %} 
+{% load static %} 
+<div class="container">
+    <div class="page-inner">
+        <div class="page-header mb-0">
+            <h3 class="fw-bold mb-1">Configuration du logiciel de gestion d'inscription et deliberation</h3>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs nav-line nav-color-secondary" id="line-compte" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="compte-tab" data-bs-toggle="pill" href="#compte" role="tab" aria-controls="compte" aria-selected="true">Compte utilisateur par défaut</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " id="line-institution-tab" data-bs-toggle="pill" href="#institution" role="tab" aria-controls="institution" aria-selected="false">Institution</a>
+                </li>
+            </ul>
+            <div class="tab-content mt-3 mb-3" id="line-tabContent">
+                <div class="tab-pane fade show active" id="compte" role="tabpanel" aria-labelledby="compte-tab">
+                    {% include './first-account.html' %}
+                </div>
+                <div class="tab-pane fade  " id="institution" role="tabpanel" aria-labelledby="line-institution-tab">
+                    {% include './first-settings-inst.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: 160px;">
+</div>
+
+
+<script text="text-javascript">
+    $(document).ready(function() {
+
+    $('#logoInstitution').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#logoPreview').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);   
+        }
+    });
+
+
+    $('#formInstitution').submit(function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        // Create FormData object to collect form data and image file
+        const formData = new FormData(this);
+ 
+
+        // Get the selected image file
+        const fileInput = $('#logoInstitution')[0];
+        const file = fileInput.files[0];
+        var idinstitution = $('#idInstitution').val()
+        // Append the image file to FormData
+        if (file) {
+            formData.append('logo', file);
+        }
+
+
+
+        // Send the FormData to the server using AJAX
+        $.ajax({
+            url: `modifier-data-institution/${idinstitution}/`, 
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                alert('Modification effectuée avec succès'); 
+                window.location.href = '{% url "institution" %}'; 
+            },
+            error: function(error) {
+                alert('Une errreur est survenue');
+            }
+        });
+    });
+});
+
+{% include "../composants/scriptlinks.html" %}
+{% include '../composants/footer.html' %}
