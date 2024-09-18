@@ -1,0 +1,67 @@
+{% extends "./main.html" %} {% load static %} {% block garageBlock %}
+
+{% block marqueBlock %}
+
+<!-- Here I put the list of marques, this is a rendering part -->
+<div class="card">
+    <div class="card-header">
+        <div class="row d-flex justify-content-between">
+            <div class="col-md-6 col-4">
+                <h4>Marques</h4>
+            </div>
+            <div class="col-md-6 col-4 text-end">
+                <button class="btn btn-secondary btn-round">
+                    <i class="fa fa-plus" title='ajouter une nouvelle option option'></i> <a
+                        href="{% url 'marque_ajouter' %}" class="text=white">Ajouter</a>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        <table class="display table table-striped mt-2" id="option-table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Description</th>
+                    <th scope="col" class='text-center'>Actions</th>
+                </tr>
+
+            </thead>
+            <tbody>
+                {% for marque in marques %}
+                <tr>
+                    <td>{{ forloop.counter }}
+                    </td>
+                    <td>{{marque.nom}}</td>
+                    <td>{{marque.description}}</td>
+                    <td class='text-center'>
+                        <button class="btn btn-primary ms-auto btn-sm launchEditModalOption"
+                            data-bs-target="#editInscriptionModal" data-bs-toggle="modal"
+                            data-id="{{ element.optionObject.id }}"
+                            data-designation="{{element.optionObject.designation}}"
+                            data-typeOption="{{element.optionObject.type_option}}">
+                            <i class="fa fa-edit text-light"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm launchDeleteModalOption"
+                            data-id="{{ element.optionObject.id }}"
+                            data-designation={{element.optionObject.designation}}
+                            data-typeOption={{element.optionObject.type_option}}>
+                            <i class="fa fa-trash text-light "></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock marqueBlock %}
+
+{% endblock garageBlock %}

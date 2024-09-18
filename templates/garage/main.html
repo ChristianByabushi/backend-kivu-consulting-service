@@ -1,0 +1,52 @@
+{% extends "../core/index.html" %} {% load static %} {% block content %}
+<div class="container">
+    <div class="page-inner">
+        <div class="page-header mb-0">
+            <h3 class="fw-bold mb-1">Gestion garage</h3>
+            <ul class="breadcrumbs mb-1">
+                <li class="nav-home">
+                    <a href="#">
+                    <a href="#">Garage</a>
+                    </a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Marques</a>
+                </li>
+
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#"> Vehicules</a>
+                </li>
+               
+            </ul>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-none" style="background-color: inherit;">
+                    <div class="card-body">
+                        <ul class="nav nav-pills nav-secondary nav-pills-no-bd" id="pills-tab-without-border" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'vehicules' %} active {% endif%}" href="{% url 'vehicules' %}">Vehicules
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'marques' %} active {% endif%}" href='{% url "marques" %}'>Marques</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-2 mb-3" id="pills-without-border-tabContent">
+                            {% block garageBlock %} {% endblock garageBlock %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

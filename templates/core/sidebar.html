@@ -35,18 +35,16 @@
                     </a>
                 </li>
 
-
-                <li class="nav-item">
+                <li class="nav-item 
+                {% if request.resolver_match.url_name == 'vehicules' %}active{% endif%} 
+                {% if request.resolver_match.url_name == 'marques' %}active{% endif%} 
+                ">
                     <style>
                         .active-sublink span {
                             color: white
                         }
                     </style>
-                    <a data-bs-toggle="collapse" href="#sidebarLayoutVehicules" class="
-                    {% if request.resolver_match.url_name == 'vehicules' %}active-sublink{% endif%} 
-                    {% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%} 
-                    
-                    ">
+                    <a data-bs-toggle="collapse" href="#sidebarLayoutVehicules" >
                         <i class="fa fa-bus" aria-hidden="true"></i>
                         <p>Garage</p>
                         <span class="caret"></span>
@@ -61,7 +59,7 @@
                             </li>
                             <li>
                                 <a href="{% url 'marques' %}"
-                                    class="{% if request.resolver_match.url_name == 'vehicules' %}active-sublink{% endif%}">
+                                    class="{% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}">
                                     <span class="sub-item">Marques</span>
                                 </a>
                             </li>
