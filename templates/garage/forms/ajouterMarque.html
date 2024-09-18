@@ -1,9 +1,61 @@
-{% extends "../marques.html" %} {% load static %} 
+{% extends "../marques.html" %} {% load static %}
+{% block marqueBlock %}
+<div class="card">
+    <div class="card-header">
+        <div class="row d-flex justify-content-between">
+            <div class="col-4">
+                <h2> <a href="{% url 'marques' %}" class="text-secondary"><i class="fa fa-arrow-circle-left"
+                            aria-hidden="true"></i> </a></h2>
+            </div>
+            <div class="col-8 text-start">
+                <h2 class="text-secondary">Ajouter une marque</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="row mb-1">
 
-{% block marqueBlock %} 
+                <div class="form-group col-md-12">
+                    <label for="">Nom marque</label>
+                    <input type="text" class="form-control" name="nom" id="nom" aria-describedby="helpId"
+                        placeholder="">
+                    <small id="helpId" class="form-text text-muted">Ex:Toyota</small>
+                </div>
+                <div class="form-group col-md-12">
+                    <label for="">Mot Slug</label>
+                    <input type="text" class="form-control" name="slug" id="slug" aria-describedby="helpId"
+                        placeholder="">
+                    <small id="helpId" class="form-text text-muted">Ex:toyota-japonaise</small>
+                </div>
+                <div class="form-group col-md-12">
+                    <label for="">Description</label>
+                    <textarea class="form-control" name="description" id="description" rows="1"></textarea>
+                </div>
+                <div class="col-md-12 mt-2 ">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                    {% for field in form %}
+                    {% for error in field.errors %}
+                    <div class="alert alert-danger small" role="alert">
+                        {{field.name}} : {{ error }}!
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-12 justify-content-center align-content-center d-flex">
+                    <button type="submit" class="btn btn-secondary text-center">Envoyer</button>
+                </div>
 
 
-    
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+
 {% endblock marqueBlock %}
-    
-

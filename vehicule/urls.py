@@ -7,8 +7,8 @@ urlpatterns = [
     # Marques
     path("marques/", views.marques, name="marques"),
     path("marques/ajouter/", views.marque_ajouter, name="marque_ajouter"),
-    path("marques/editer/<int:pk>/", views.marque_editer, name="marque_update"),
-    path("marques/supprimer/<int:pk>/", views.marque_delete, name="marque_delete"),
+    path("marques/editer/<str:slug>/", views.marque_editer, name="marque_editer"),
+    path("marques/supprimer/<str:slug>/", views.marque_delete, name="marque_supprimer"),
 
     # Véhicules
     path("vehicules/", views.vehicules, name="vehicules"),

@@ -10,19 +10,25 @@
                 <h4>Marques</h4>
             </div>
             <div class="col-md-6 col-4 text-end">
-                <button class="btn btn-secondary btn-round">
-                    <i class="fa fa-plus" title='ajouter une nouvelle option option'></i> <a
-                        href="{% url 'marque_ajouter' %}" class="text=white">Ajouter</a>
-                </button>
+                <a href="{% url 'marque_ajouter' %}" class="text-white">
+                    <button class="btn btn-secondary btn-round">
+                        <i class="fa fa-plus" title='ajouter une nouvelle option option'></i> Ajouter
+                    </button>
+                </a>
             </div>
         </div>
     </div>
     <div class="card-body">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
-        </div>
-        {% endfor %}
+        {% if messages %}
+        <ul class="list-group">
+            {% for message in messages %}
+            <li class="{{ message.tags }} list-group-item alert alert-warning">{{ message }}</li>
+            <script>
+                $(".alert").alert();
+            </script>
+            {% endfor %}
+        </ul>
+        {% endif %}
         <table class="display table table-striped mt-2" id="option-table">
             <thead>
                 <tr>
@@ -41,17 +47,13 @@
                     <td>{{marque.nom}}</td>
                     <td>{{marque.description}}</td>
                     <td class='text-center'>
-                        <button class="btn btn-primary ms-auto btn-sm launchEditModalOption"
-                            data-bs-target="#editInscriptionModal" data-bs-toggle="modal"
-                            data-id="{{ element.optionObject.id }}"
-                            data-designation="{{element.optionObject.designation}}"
-                            data-typeOption="{{element.optionObject.type_option}}">
-                            <i class="fa fa-edit text-light"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm launchDeleteModalOption"
-                            data-id="{{ element.optionObject.id }}"
-                            data-designation={{element.optionObject.designation}}
-                            data-typeOption={{element.optionObject.type_option}}>
+                        <a href="{% url 'marque_editer' marque.slug %}">
+                            <button class="btn btn-primary ms-auto btn-sm" type="submit">
+                                <i class="fa fa-edit text-light"></i>
+                            </button>
+                        </a>
+
+                        <button class="btn btn-danger btn-sm supprimerMarque" type="submit" data-slug="{{marque.slug}}">
                             <i class="fa fa-trash text-light "></i>
                         </button>
                     </td>
@@ -61,6 +63,18 @@
         </table>
     </div>
 </div>
+
+<script text="text-javascript">
+    $(".supprimerMarque").click(function (e) { 
+        e.preventDefault();
+        if(confirm('Voulez vraiment supprimer cette marque')){
+            var itemSlug = $(this).attr('data-slug');
+            var url = `/garage/marques/supprimer/${itemSlug}/`; 
+            window.location.href = url;
+        }
+    });
+
+</script>
 
 {% endblock marqueBlock %}
 

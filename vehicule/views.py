@@ -4,6 +4,7 @@ from payement.models import Payement
 from reservation.models import Reservation
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Marque, Vehicule
+from django.contrib import messages  
 from .forms import MarqueForm, VehiculeForm
 # Create your views here.
 def index(request):
@@ -23,17 +24,19 @@ def vehicules(request):
     return render(request, 'garage/vehicules.html',
            {"vehicules":vehicules,
                                              }) 
-
 def marque_ajouter(request):
     if request.method == 'POST':
         form = MarqueForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'La marque a été créée avec succès!')
             return redirect('marques')
+        else:
+            errors = form.errors.as_text()
+            messages.error(request, f'La création de la marque a échoué. {errors}')
     else:
         form = MarqueForm()
-    return render(request, 'marques/create.html', {'form': form})
-
+    return render(request, 'garage/forms/ajouterMarque.html', {'form': form}) 
 
 def marque_editer(request, slug):
     marque = get_object_or_404(Marque, slug=slug)
@@ -41,14 +44,19 @@ def marque_editer(request, slug):
         form = MarqueForm(request.POST, instance=marque)
         if form.is_valid():
             form.save()
+            messages.success(request, 'La marque a été editée avec succès!')
             return redirect('marques')
+        else:
+            errors = form.errors.as_text()
+            messages.error(request, f'La modification de la marque a échoué. {errors}')
     else:
         form = MarqueForm(instance=marque)
-    return render(request, 'marques/edit.html', {'form': form})
-
+    return render(request, 'garage/forms/editerMarque.html', {'marque': marque})
 
 def marque_delete(request, slug):
     marque = get_object_or_404(Marque, slug=slug)
     marque.delete()
+    messages.success(request, "La marque a été supprimée avec succès.")
     return redirect('marques')
-    
+
+

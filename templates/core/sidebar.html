@@ -37,7 +37,10 @@
 
                 <li class="nav-item 
                 {% if request.resolver_match.url_name == 'vehicules' %}active{% endif%} 
-                {% if request.resolver_match.url_name == 'marques' %}active{% endif%} 
+                {% if request.resolver_match.url_name == 'marque_ajouter' %} active {% endif%}
+                {% if request.resolver_match.url_name == 'marques' %}active{% endif%}  
+                {% if request.resolver_match.url_name == 'marque_editer' %}active{% endif%}  
+                {% if request.resolver_match.url_name == 'marque_supprimer' %}active{% endif%}  
                 ">
                     <style>
                         .active-sublink span {
@@ -59,7 +62,12 @@
                             </li>
                             <li>
                                 <a href="{% url 'marques' %}"
-                                    class="{% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}">
+                                    class="{% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}
+                                    {% if request.resolver_match.url_name == 'marque_ajouter' %} active-sublink {% endif%}
+                                    {% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}  
+                                    {% if request.resolver_match.url_name == 'marque_editer' %}active-sublink{% endif%}  
+                                    {% if request.resolver_match.url_name == 'marque_supprimer' %}activev-sublink{% endif%}  
+                                    ">
                                     <span class="sub-item">Marques</span>
                                 </a>
                             </li>
@@ -73,7 +81,7 @@
                     </span>
                     <h4 class="text-section">Gestion Parametres</h4>
                 </li>
-
+                
                 <li
                     class="nav-item {% if request.resolver_match.url_name == 'comptes' %} active{% endif%}{% if request.resolver_match.url_name == 'groupes' %} active{% endif%} ">
                     <a data-bs-toggle="collapse" href="#tables">
