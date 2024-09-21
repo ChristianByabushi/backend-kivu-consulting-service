@@ -12,11 +12,14 @@ urlpatterns = [
 
     # Véhicules
     path("vehicules/", views.vehicules, name="vehicules"),
+    path("vehicules/ajouter/", views.vehicule_ajouter, name="vehicule_ajouter"),
+    path("vehicules/editer/<str:numeroplaque>/", views.vehicule_editer, name="vehicule_editer"),
+    path("vehicules/supprimer/<str:numeroplaque>/", views.vehicule_delete, name="vehicule_supprimer"),
     # path("vehicules/ajouter/", views.vehicule_create, name="vehicule_create"),
     # path("vehicules/editer/<int:pk>/", views.vehicule_update, name="vehicule_update"),
     # path("vehicules/supprimer/<int:pk>/", views.vehicule_delete, name="vehicule_delete"),
 ]
-
+#vehicule_editer
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += staticfiles_urlpatterns()

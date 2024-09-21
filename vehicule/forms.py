@@ -13,3 +13,10 @@ class VehiculeForm(forms.ModelForm):
     class Meta:
         model = Vehicule
         fields = '__all__'
+        
+        def clean_image(self):
+            image = self.cleaned_data.get('image')
+            if not image and self.instance.pk:
+                # If no new image is provided, keep the existing image
+                return self.instance.image
+            return image

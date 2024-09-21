@@ -21,14 +21,13 @@ class Vehicule(models.Model):
         Marque, related_name="vehicules", on_delete=models.SET_NULL, null=True
     ) 
     modele = models.CharField(max_length=255) 
-    annee = models.IntegerField() 
+    anneeAchat = models.IntegerField() 
     motorisation = models.CharField(max_length=255)
     poids = models.CharField(max_length=255) 
     couleur = models.CharField(max_length=255) 
     prix = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to="vehicules/", blank=True)
     created_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         ordering = ("-created_at",)
 

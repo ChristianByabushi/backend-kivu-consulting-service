@@ -40,7 +40,9 @@
                 {% if request.resolver_match.url_name == 'marque_ajouter' %} active {% endif%}
                 {% if request.resolver_match.url_name == 'marques' %}active{% endif%}  
                 {% if request.resolver_match.url_name == 'marque_editer' %}active{% endif%}  
-                {% if request.resolver_match.url_name == 'marque_supprimer' %}active{% endif%}  
+                {% if request.resolver_match.url_name == 'marque_supprimer' %}active{% endif%} 
+                {% if request.resolver_match.url_name == 'vehicule_ajouter' %} active {% endif%} 
+                {% if request.resolver_match.url_name == 'vehicule_editer' %}active{% endif%} 
                 ">
                     <style>
                         .active-sublink span {

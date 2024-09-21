@@ -1,9 +1,89 @@
 {% extends "./main.html" %} {% load static %} {% block garageBlock %}
+{% block vehiculeBlock %}
 
-            {% block vehiculeBlock %} 
+<!-- Here I put the list of marques, this is a rendering part -->
+<div class="card overflow-y-scroll overflow-y-auto">
+    <div class="card-header">
+        <div class="row d-flex justify-content-between">
+            <div class="m-2">
+                <h4>Vehicules</h4>
+            </div>
+            <div class="m-2">
+                <a href="{% url 'vehicule_ajouter' %}" class="text-white">
+                    <button class="btn btn-secondary btn-round">
+                        <i class="fa fa-plus" title='ajouter une nouvelle option option'></i> Ajouter
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if messages %}
+        <ul class="list-group">
+            {% for message in messages %}
+            <li class="{{ message.tags }} list-group-item alert alert-warning">{{ message }}</li>
+            <script>
+                $(".alert").alert();
+            </script>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <table class="display-1 table-responsive table mt-2 table-head-bg-secondary">
+            <thead>
+                <tr>
+                    <th>NumeroPlaque</th>
+                    <th>Image</th>
+                    <th>Marque</th>
+                    <th>Modele</th>
+                    <th>AnneeAchat</th>
+                    <th>Motorisation</th>
+                    <th>poids</th>
+                    <th>couleur</th>
+                    <th>prix</th>
+                    <th class='text-center'>Actions</th>
+                </tr> 
+            </thead>
+            <tbody>
+                {% for vehicule in vehicules %}
+                <tr>
+                    <td>{{vehicule.numeroPlaque}}</td> 
+                    <td>
+                        <img src="{{vehicule.get_image}}" class="img-fluid" style="width: 50px; height:50px; max-width: 50px; max-height:50px" alt="not present">
+                    </td> 
+                    <td>{{vehicule.marque.nom}}</td>
+                    <td>{{vehicule.modele}}</td>
+                    <td>{{vehicule.anneeAchat}}</td>
+                    <td>{{vehicule.motorisation}}</td>
+                    <td>{{vehicule.poids}}</td>
+                    <td>{{vehicule.couleur}}</td>
+                    <td>{{vehicule.prix}}</td>
+                    <td class='text-center'>
+                        <a href="{% url 'vehicule_editer' vehicule.numeroPlaque %}">
+                            <button class="btn btn-primary ms-auto btn-sm" type="submit">
+                                <i class="fa fa-edit text-light"></i>
+                            </button>
+                        </a>
+                        <button class="btn btn-danger btn-sm supprimerVehicule" type="submit" data-slug="{{vehicule.numeroPlaque}}">
+                            <i class="fa fa-trash text-light "></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        <!-- Here I put the list of vehicules, this is a rendering part -->
-                
-            {% endblock vehiculeBlock %}
+<script text="text-javascript">
+    $(".supprimerVehicule").click(function (e) { 
+        e.preventDefault();
+        if(confirm('Voulez vraiment supprimer ce produit ?')){
+            var itemSlug = $(this).attr('data-slug');
+            var url = `/garage/vehicules/supprimer/${itemSlug}/`; 
+            window.location.href = url;
+        }
+    });
+</script>
 
+{% endblock vehiculeBlock %}
 {% endblock garageBlock %}
