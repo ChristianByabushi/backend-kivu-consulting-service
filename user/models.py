@@ -30,7 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     avatar = models.ImageField(
         upload_to='images/avatar/', default='/images/avatar/avatar.png')
     objects = CustomUserManager()
-    role = models.CharField(max_length=50, null=True, default='Client')
+    role = models.CharField(max_length=10, null=True, default='Client')
 
     USERNAME_FIELD = 'email'
     def get_avatar_url(self):

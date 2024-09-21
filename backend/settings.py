@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'vehicule',
     'vendors',
     'location',
-    'approvisionnement',
+    # 'approvisionnement',
     'contract',
     'payement',
     'reservation',
