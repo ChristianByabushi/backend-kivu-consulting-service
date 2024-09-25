@@ -1,6 +1,4 @@
 {% load static %}
-
-<!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">
         <!-- Logo Header -->
@@ -22,60 +20,100 @@
                 <i class="gg-more-vertical-alt"></i>
             </button>
         </div>
-        <!-- End Logo Header -->
     </div>
+
     <div class="sidebar-wrapper scrollbar scrollbar-inner">
         <div class="sidebar-content">
             <ul class="nav nav-secondary">
+                {% if request.user.is_superuser %}
                 <li
-                    class="nav-item {% if request.resolver_match.url_name == 'index' %} active{% endif%}{% if request.resolver_match.url_name == 'index' %} active{% endif%} ">
-                    <a href="{% url 'index' %}">
+                class="nav-item {% if request.resolver_match.url_name == 'index' %} active{% endif%}{% if request.resolver_match.url_name == 'index' %} active{% endif%} ">
+                <a href="{% url 'index' %}">
+                    <i class="fa fa-home" aria-hidden="true"></i>
+                    <p>Accueil</p>
+                </a>
+          </li>
+          
+          <li class="nav-item 
+          {% if request.resolver_match.url_name == 'vehicules' %}active{% endif%} 
+          {% if request.resolver_match.url_name == 'marque_ajouter' %} active {% endif%}
+          {% if request.resolver_match.url_name == 'marques' %}active{% endif%}  
+          {% if request.resolver_match.url_name == 'marque_editer' %}active{% endif%}  
+          {% if request.resolver_match.url_name == 'marque_supprimer' %}active{% endif%} 
+          {% if request.resolver_match.url_name == 'vehicule_ajouter' %} active {% endif%} 
+          {% if request.resolver_match.url_name == 'vehicule_editer' %}active{% endif%} 
+          ">
+          <style>
+                  .active-sublink span {
+                      color: white
+                  }
+              </style>
+              <a data-bs-toggle="collapse" href="#sidebarLayoutVehicules">
+                  <i class="fa fa-bus" aria-hidden="true"></i>
+                  <p>Garage</p>
+                  <span class="caret"></span>
+              </a>
+              <div class="collapse" id="sidebarLayoutVehicules">
+                  <ul class="nav nav-collapse">
+                      <li>
+                          <a href="{% url 'vehicules' %}"
+                              class="{% if request.resolver_match.url_name == 'vehicules' %}active-sublink{% endif%}">
+                              <span class="sub-item">Vehicules</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="{% url 'marques' %}" class="{% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}
+                              {% if request.resolver_match.url_name == 'marque_ajouter' %} active-sublink {% endif%}
+                              {% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}  
+                              {% if request.resolver_match.url_name == 'marque_editer' %}active-sublink{% endif%}  
+                              {% if request.resolver_match.url_name == 'marque_supprimer' %}activev-sublink{% endif%}  
+                              ">
+                              <span class="sub-item">Marques</span>
+                          </a>
+                      </li>
+                  </ul>
+              </div>
+          </li>
+
+                {% endif %}
+
+                <li
+                    class="nav-item {% if request.resolver_match.url_name == 'locations' %} active{% endif%}
+                    {% if request.resolver_match.url_name == 'locations' %} active{% endif%} ">
+                    <a href="{% url 'locations' %}">
                         <i class="fa fa-home" aria-hidden="true"></i>
-                        <p>Accueil</p>
+                        <p>Location</p>
                     </a>
                 </li>
 
-                <li class="nav-item 
-                {% if request.resolver_match.url_name == 'vehicules' %}active{% endif%} 
-                {% if request.resolver_match.url_name == 'marque_ajouter' %} active {% endif%}
-                {% if request.resolver_match.url_name == 'marques' %}active{% endif%}  
-                {% if request.resolver_match.url_name == 'marque_editer' %}active{% endif%}  
-                {% if request.resolver_match.url_name == 'marque_supprimer' %}active{% endif%} 
-                {% if request.resolver_match.url_name == 'vehicule_ajouter' %} active {% endif%} 
-                {% if request.resolver_match.url_name == 'vehicule_editer' %}active{% endif%} 
-                ">
-                    <style>
-                        .active-sublink span {
-                            color: white
-                        }
-                    </style>
-                    <a data-bs-toggle="collapse" href="#sidebarLayoutVehicules" >
-                        <i class="fa fa-bus" aria-hidden="true"></i>
-                        <p>Garage</p>
-                        <span class="caret"></span>
+                <li
+                    class="nav-item {% if request.resolver_match.url_name == 'reservations' %} active{% endif%} ">
+                    <a href="{% url 'reservations' %}">
+                        <i class="fa fa-bus-alt"></i>
+                        <p>Mes reservations</p>
                     </a>
-                    <div class="collapse" id="sidebarLayoutVehicules">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a href="{% url 'vehicules' %}"
-                                    class="{% if request.resolver_match.url_name == 'vehicules' %}active-sublink{% endif%}">
-                                    <span class="sub-item">Vehicules</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'marques' %}"
-                                    class="{% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}
-                                    {% if request.resolver_match.url_name == 'marque_ajouter' %} active-sublink {% endif%}
-                                    {% if request.resolver_match.url_name == 'marques' %}active-sublink{% endif%}  
-                                    {% if request.resolver_match.url_name == 'marque_editer' %}active-sublink{% endif%}  
-                                    {% if request.resolver_match.url_name == 'marque_supprimer' %}activev-sublink{% endif%}  
-                                    ">
-                                    <span class="sub-item">Marques</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
+                <li
+                class="nav-item {% if request.resolver_match.url_name == 'payements' %} active{% endif%}
+                {% if request.resolver_match.url_name == 'payements' %} active{% endif%} ">
+                <a href="{% url 'payements' %}">
+                <i class="fa fa-money-check" aria-hidden="true"></i>
+                    <p>Mes payements</p>
+                </a>
+                </li>
+
+
+                <li
+                    class="nav-item {% if request.resolver_match.url_name == 'logout' %} active{% endif%}
+                    {% if request.resolver_match.url_name == 'logout' %} active{% endif%} ">
+                    <a href="{% url 'logout' %}">
+                        <i class="fa fa-arrow-left" ></i>
+                        <p>Deconnexion</p>
+                    </a>
+                </li>
+
+
+                
                 {% if 'Administration' in groups %}
                 <li class="nav-section">
                     <span class="sidebar-mini-icon">
@@ -83,7 +121,7 @@
                     </span>
                     <h4 class="text-section">Gestion Parametres</h4>
                 </li>
-                
+
                 <li
                     class="nav-item {% if request.resolver_match.url_name == 'comptes' %} active{% endif%}{% if request.resolver_match.url_name == 'groupes' %} active{% endif%} ">
                     <a data-bs-toggle="collapse" href="#tables">

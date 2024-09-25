@@ -11,6 +11,36 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required,login_not_required
 from user.models import User
+from django.contrib import messages
+
+@login_not_required
+def register(request):
+    if not request.method=='POST':
+        return render(request, "comptes/register.html")  
+    else:
+        email = request.POST.get("email")
+        password1 = request.POST.get("password1")
+        firstname = request.POST.get("firstname")
+        password2 = request.POST.get("password2")
+
+        # Check if passwords match
+        if password1 != password2:
+            messages.error(request, "Les mots de passe ne correspondent pas.")
+            return render(request, "register.html")
+
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Un utilisateur avec cet e-mail existe déjà.")
+            return render(request, "register.html")
+
+        # Create the user without username
+        user = User.objects.create_user(email=email, password=password1, first_name=firstname)
+        user.save()
+
+        return redirect('login')  
+
+
+
 @login_not_required
 def login(request):
     if request.user.is_authenticated: 
@@ -50,7 +80,7 @@ def reinitialiserMotDepasseUtilisateur(request, userId):
 
 def logout_view(request):
     logout(request) 
-    return  redirect('login')
+    return  redirect('index')
 
 def changeMotdepasse(request):
     ancien_pwd = request.POST.get('ancienPwd')

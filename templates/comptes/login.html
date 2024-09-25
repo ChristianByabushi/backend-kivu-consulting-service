@@ -1,9 +1,8 @@
-{% load static %}
+{% extends '../core/index.html' %}
+{% load static %} 
+{% block content %}
 <style>
-    body {
-        background-color: #f8f9fa;
-        font-family: 'Roboto', sans-serif;
-    }
+
 
     .login-container {
         display: flex;
@@ -22,7 +21,7 @@
         text-align: center;
     }
 
-    .logo {
+    .login-container.logo {
         display: block;
         margin: 0 auto 20px;
         width: 100px;
@@ -30,11 +29,11 @@
         object-fit: cover;
     }
 
-    .form-group {
+    .login-container.form-group {
         width: 100%;
     }
 
-    .form-control {
+    .login-container.form-control {
         height: 45px;
         padding: 10px;
         font-size: 16px;
@@ -71,13 +70,6 @@
         margin-bottom: 30px;
     }
 </style>
-
-<!DOCTYPE html>
-<html lang="en">
-
-{% include "../composants/header.html" %}
-
-<body>
     <div class="login-container">
         {% if next %}
         {% if user.is_authenticated %}
@@ -93,12 +85,11 @@
             
             <form method="POST">
                 <img src="{% static 'assets/img/logokcs.jpg' %}"
-                style="max-width: 120px; max-height: 100px; object-fit: fill; " alt="Logo Institution" class="logo">
+                style="max-width: 150px; max-height: 100px; object-fit: fill; " alt="Logo Institution" class="logo">
                 {% csrf_token %}
                 <div class="form-group">
                     <div class="col-12">
-                        <h2>Gari-App</h2>
-                        <p class="d-inline">Connectez-vous</p>
+                        <h2>Se connecter à Gari-App</h2>
                     </div>
                     <div class="col-12">
                         <div class="form-group">
@@ -136,4 +127,8 @@
         </style>
         </form>
     </div>
-</body>
+
+{% endblock content %}
+
+
+

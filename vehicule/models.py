@@ -26,6 +26,7 @@ class Vehicule(models.Model):
     poids = models.CharField(max_length=255) 
     couleur = models.CharField(max_length=255) 
     prix = models.DecimalField(max_digits=10, decimal_places=2)
+    enlocation = models.BooleanField(default=False)
     image = models.ImageField(upload_to="vehicules/", blank=True)
     created_at = models.DateTimeField(auto_now=True)
     class Meta:

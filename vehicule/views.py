@@ -5,20 +5,30 @@ from reservation.models import Reservation
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Marque, Vehicule
 from django.contrib import messages  
+from django.contrib.auth.decorators import login_required,login_not_required
 from .forms import MarqueForm, VehiculeForm
-# Create your views here.
+
+
+
+
+@login_required
 def index(request):
     payements = Payement.objects.all()
     vehicules = Vehicule.objects.all().count
     marques = Marque.objects.all().count
     reservations = Reservation.objects.all()
-    return render(request,'dashboard/index.html')
+    
+    if request.user.is_superuser:
+        return render(request,'dashboard/index.html') 
+    else:
+        return redirect('locations') 
 
 def marques(request):
     marques = Marque.objects.all()
     return render(request, 'garage/marques.html',
            {"marques":marques,
                                              })
+@login_not_required
 def vehicules(request):
     marques = Marque.objects.all()
     vehicules = Vehicule.objects.all()

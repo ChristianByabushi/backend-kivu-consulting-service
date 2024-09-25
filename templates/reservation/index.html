@@ -1,0 +1,46 @@
+{% extends "../core/index.html" %} {% load static %} {% block content %}
+<div class="container">
+    <div class="page-inner">
+        <div class="page-header mb-0">
+            <h3 class="fw-bold mb-1">Mes reservations</h3>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="row mt-lg-1 search-row">
+                    <div class="col-lg-2 col-5">
+                        <input type="date" id="debut_date" class="form-control form-control" />
+                    </div>
+                    <div class="col-lg-1 col-2 mt-2 text-center">
+                        <span> -- </span>
+                    </div>
+                    <div class="col-lg-2 col-5">
+                        <input type="date" id="fin_date" class="form-control form-control" />
+                    </div>
+                    <div class="col-lg-3">
+                        <select name="" class="form-select form-control selectClasse" id="">
+                            <option value="">Par Vehicules</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-6 mt-lg-0 mt-1">
+                        <select name="sectionOption" id="section_option" class="form-select form-control selectOption">
+                            <option value="">Par marques</option>
+                            {% for option in options %}
+                            <option value="{{option.id}}">{{option.designation}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-6 mt-lg-0 mt-1">
+                        <select name="classeEleve" class="form-select form-control selectClasse" id="classeEleve">
+                            <option value="">Par Contrat</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

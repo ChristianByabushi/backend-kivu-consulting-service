@@ -5,6 +5,11 @@
 {% include "../composants/header.html" %}
 
 <body>
+    <style>
+        a.link:hover {
+            color: black;
+        }
+    </style>
     <main>
         <div class="wrapper">
             {% include "./sidebar.html" %}
@@ -14,7 +19,8 @@
                         <!-- Logo Header -->
                         <div class="logo-header" data-background-color="dark">
                             <a href="index.html" class="logo">
-                                <img src='{% static user.avatar %}' alt="navbar brand" class="navbar-brand" height="20" />
+                                <img src='{% static user.avatar %}' alt="navbar brand" class="navbar-brand"
+                                    height="20" />
                             </a>
 
                             <div class="nav-toggle">
@@ -34,7 +40,8 @@
                     <!-- Navbar Header -->
                     <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
                         <div class="container-fluid">
-                            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                            <nav
+                                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <button type="submit" class="btn btn-search pe-1">
@@ -46,59 +53,71 @@
                             </nav>
 
                             <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
-                                                        
-                                <li class="nav-item topbar-user dropdown hidden-caret">
-                                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                                        <div class="avatar-sm">
-                                            <img src="{{user.get_avatar_url}}" alt="..." class="avatar-img rounded-circle" />
-                                        </div>
-                                        <span class="profile-username">
-                                        <span class="fw-bold">{{user.role}}</span>
-                                        </span>
+
+                                <!-- Cart Icon with Item Count -->
+                                <li class="nav-item topbar-cart dropdown hidden-caret">
+                                    <a class="dropdown-toggle cart-pic" data-bs-toggle="dropdown" href="#"
+                                        aria-expanded="false">
+                                        <i class="fa fa-shopping-cart fa-lg"></i>
+                                        <!-- Display the number of items in the cart -->
+                                        <span class="badge badge-danger " style="margin-right: 20px;" id="cart-count"> <span
+                                                class="mt-3">0</span></span>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-user animated fadeIn">
-                                        <div class="dropdown-user-scroll scrollbar-outer">
+                                    <ul class="dropdown-menu dropdown-cart animated fadeIn ">
+                                        <div class="dropdown-cart-scroll scrollbar-outer">
                                             <li>
-                                                <div class="user-box">
-                                                    <div class="avatar-lg">
-                                                <img src="{{user.get_avatar_url}}" alt="not found" class="avatar-img rounded" />
-                                                    </div>
+                                                <div class="cart-box">
                                                     <div class="u-text">
-                                                        <h4>{{user.noms}}</h4>
-                                                        <a href="{% url "Moncompte" %}" class="btn btn-xs btn-secondary btn-sm">Voire Profile</a>
+                                                        <h4>My Cart</h4>
+                                                        <a href="{% url 'index' %}"
+                                                            class="btn btn-xs btn-secondary btn-sm">View Cart</a>
                                                     </div>
                                                 </div>
                                             </li>
-                                            
                                             <li>
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="{% url 'Moncompte' %}">Compte</a>
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="#">Parametres</a>
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                                                <a class="dropdown-item" href="{% url 'index' %}">Checkout</a>
                                             </li>
                                         </div>
                                     </ul>
                                 </li>
+
+                                <!-- User Profile Dropdown -->
+
+                                {% if request.user.is_authenticated %}
+                                <span class="display-6" style="margin-right: 20px;">
+                                    <i class="fas fa-user" aria-hidden="true">
+                                        {{request.user.email}}
+                                    </i>
+                                </span>
+                                <a href=" {% url 'logout' %}" class="text-black m-2 link">Deconnexion</a>
+
+                                {% else %}
+
+                                <a href=" {% url 'login' %}" class="text-black m-2 link">Login</a>
+                                <a href=" {% url 'register' %}" style="color: dark;" class="text-bg-dark link">Creer un
+                                    compte</a>
+
+
+                                {% endif %}
+
+
                             </ul>
+
                         </div>
                     </nav>
                     <!-- End Navbar -->
                 </div>
-                {% block content %} 
-                
-                
-                {% endblock content %} 
-                
-                
+                {% block content %}
+
+
+                {% endblock content %}
+
+
                 {% include "../composants/footer.html" %}
 
-
             </div>
-
             <!-- Custom template | don't include it in your project! -->
-
             {% comment %} <div class="custom-template">
                 <div class="title">Settings</div>
                 <div class="custom-content">
@@ -188,7 +207,7 @@
         }
         var csrftoken = getCookie('csrftoken');
         $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
+            beforeSend: function (xhr, settings) {
                 if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
                     // Only send the token to relative URLs i.e. locally.
                     xhr.setRequestHeader("X-CSRFToken", csrftoken);
