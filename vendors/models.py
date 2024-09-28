@@ -20,5 +20,5 @@ class Client(User):
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateField(auto_now_add=True)
     def __str__(self):
-        return f"Client-{self.name}.{self.id}"
+        return f"Client-{self.nom}.{self.id}"
 

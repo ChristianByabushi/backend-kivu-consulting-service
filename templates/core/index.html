@@ -53,8 +53,6 @@
                             </nav>
 
                             <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
-
-                                <!-- Cart Icon with Item Count -->
                                 <li class="nav-item topbar-cart dropdown hidden-caret">
                                     <a class="dropdown-toggle cart-pic" data-bs-toggle="dropdown" href="#"
                                         aria-expanded="false">
@@ -85,7 +83,7 @@
                                 <!-- User Profile Dropdown -->
 
                                 {% if request.user.is_authenticated %}
-                                <span class="display-6" style="margin-right: 20px;">
+                                <span class="" style="margin-right: 20px;">
                                     <i class="fas fa-user" aria-hidden="true">
                                         {{request.user.email}}
                                     </i>

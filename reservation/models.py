@@ -9,4 +9,8 @@ class Reservation(models.Model):
     dateFin = models.DateField() 
     confirmed = models.BooleanField(default=True)
     dateDebut = models.DateField()
-    statut = models.CharField(max_length=50, choices=[('en_attente', 'En attente'), ('confirmee', 'Confirmée'), ('annulee', 'Annulée')]) 
+    statut = models.CharField(max_length=50, choices=[('en_attente', 'En attente'), ('Approuvee', 'Approuvee'), ('annulee', 'Annulée')]) 
+    
+    def __str__(self):
+        return f"{self.client.nom}-reservation-{self.date_creation}"
+    

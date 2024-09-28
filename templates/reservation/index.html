@@ -16,12 +16,8 @@
                     <div class="col-lg-2 col-5">
                         <input type="date" id="fin_date" class="form-control form-control" />
                     </div>
-                    <div class="col-lg-3">
-                        <select name="" class="form-select form-control selectClasse" id="">
-                            <option value="">Par Vehicules</option>
-                        </select>
-                    </div>
-                    <div class="col-lg-2 col-6 mt-lg-0 mt-1">
+
+                    <div class="col-lg-2 col-6">
                         <select name="sectionOption" id="section_option" class="form-select form-control selectOption">
                             <option value="">Par marques</option>
                             {% for option in options %}
@@ -29,15 +25,104 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="col-lg-2 col-6">
+                        <select name="" class="form-select form-control selectClasse" id="">
+                            <option value="">Par Vehicules</option>
+                        </select>
+                    </div>
+
                     <div class="col-lg-2 col-6 mt-lg-0 mt-1">
                         <select name="classeEleve" class="form-select form-control selectClasse" id="classeEleve">
-                            <option value="">Par Contrat</option>
+                            <option value="">Par contrat</option>
+                            <option value="">Par reservation</option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2  col-6 mt-lg-1 mt-1">
+                        <select name="classeEleve" class="form-select form-control selectClasse" id="classeEleve">
+                            <option value="">Approuvee</option>
+                            <option value="">En attente</option>
+                            <option value="">Annullee</option>
                         </select>
                     </div>
                 </div>
             </div>
+
             <div class="card-body">
-                
+                <!-- Reservation -->
+                {% if reservation %}
+                <table>
+                    <thead>
+                        <th>Véhicule</th>
+                        <th>Marque</th>
+                        <th>Prix</th>
+                        <th>Date Fin</th>
+                        <th>Date Début</th>
+                        <th>Date Creation</th>
+                        <th>Statut</th>
+                        <th>###</th>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                        <tr>
+                            <td>{{reservation.vehicule}}</td>
+                            <td>{{reservation.vehicule.marque }}</td>
+                            <td>{{reservation.dateFin }}</td>
+                            <td>{{reservation.dateDebut }}</td>
+                            <td>{{reservation.date_creation }}</td>
+                            <td>{{reservation.statut }}</td>
+                            <td>
+                                <div class="form-button-action">
+                                    <button type="button" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-link btn-danger" data-original-title="Remove">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% elif contrat %}
+                <table>
+                    <thead>
+                        <th>#</th>
+                        <th>Montat-total</th>
+                        <th>Description</th>
+                        <th>Date Creation</th>
+                        <th>###</th>
+                    </thead>
+                    <tbody>
+                        {% for contract in contracts %} 
+                        <tr>
+                            <td>{{contract}}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <div class="form-button-action">
+                                    <button type="button" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task">
+                                        <i class="fa fa-file-pdf"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+
+
+
+
+
             </div>
         </div>
     </div>
