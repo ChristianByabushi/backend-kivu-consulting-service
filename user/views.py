@@ -12,7 +12,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required,login_not_required
 from user.models import User
 from django.contrib import messages
-
+from vendors.models import Client
 @login_not_required
 def register(request):
     if not request.method=='POST':
@@ -26,20 +26,19 @@ def register(request):
         # Check if passwords match
         if password1 != password2:
             messages.error(request, "Les mots de passe ne correspondent pas.")
-            return render(request, "register.html")
+            return render(request, "comptes/register.html")
 
         # Check if email already exists
         if User.objects.filter(email=email).exists():
             messages.error(request, "Un utilisateur avec cet e-mail existe déjà.")
-            return render(request, "register.html")
+            return render(request, "comptes/register.html")
 
         # Create the user without username
-        user = User.objects.create_user(email=email, password=password1, first_name=firstname)
+        user = Client.objects.create(email=email, password=password1, role="Client", first_name=firstname)
+        user.password = make_password(password1)
         user.save()
 
         return redirect('login')  
-
-
 
 @login_not_required
 def login(request):
