@@ -92,8 +92,11 @@
 
                                 {% else %}
 
-                                <a href=" {% url 'login' %}" class="text-black m-2 link">Login</a>
-                                <a href=" {% url 'register' %}" style="color: dark;" class="text-bg-dark link">Creer un
+                                <a href=" {% url 'login' %}" class="text-dark m-2
+                                {% if request.resolver_match.url_name == 'login' %} text-primary{% endif%}
+                                ">Login</a>
+                                <a href=" {% url 'register' %}" class=" text-dark {% if request.resolver_match.url_name == 'register' %} text-primary{% endif%}
+                              ">Creer un
                                     compte</a>
 
 

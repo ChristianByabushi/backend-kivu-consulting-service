@@ -1,0 +1,78 @@
+{% extends './index.html' %}
+
+{% block reservation %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <a href="{% url 'reservations' %}"> <i class="fa fa-arrow-circle-left text-secondary" style="font-size: 30px;"
+                aria-hidden="true"></i></a>
+        <h3 class="text-center text-secondary">Reserver un vehicule choisissez à votre choix</h3>
+    </div>
+
+    <div class="card-body">
+        <form id="vehiculeSelectionForm" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="vehiculeSelect" class="form-label">Choisir le vehicule de votre choix parmi les vehicules
+                    disponibles au garage</label>
+                <select name="vehicule" class="form-select" id="vehiculeSelect" aria-label="Select a vehicle">
+                    {% for vehicule in tous_les_vehicules %}
+                    <option value="{{ vehicule.id }}" data-price="{{ vehicule.prix }}"
+                        data-modele="{{ vehicule.modele }}" data-marque="{{ vehicule.marque.nom }}"
+                        data-get_image="{{ vehicule.get_image }}">
+                        {{ vehicule.modele }} - {{ vehicule.marque.nom }} (Prix: ${{ vehicule.prix }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div id="vehiculeDetails" class="mt-4">
+                        <h4 id="vehiculeModele">{{tous_les_vehicules.first.modele}}</h4>
+                        <p id="vehiculeMarque">{{tous_les_vehicules.first.marque.nom}}</p>
+                        <p id="vehiculePrix">{{tous_les_vehicules.first.prix}}</p>
+                        <img src="{{tous_les_vehicules.first.get_image}}" id="vehiculeImage" class="img-fluid"
+                            style="width: 200px; height: 180px; object-fit: fill;" alt="Vehicule Image">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <p>Definissez la date à laquelle vous comptez allouer ce vechicule</p>
+                    <div class="form-group">
+                      <label for="">Date de debut</label>
+                      <input type="date"
+                        class="form-control" name="dateFin" id="dateFin" aria-describedby="helpId" placeholder="">
+                    </div>
+                    <div class="text-center">
+                        <span class="text-center">--</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Date de fin</label>
+                        <input type="date"
+                          class="form-control" name="dateDebut" id="dateDebut" aria-describedby="helpId" placeholder="">
+                      </div>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+        <a href="{% url 'reservations' %}" class="btn btn-danger">Annuler</a>
+        <button class="btn btn-secondary"> <i class="fa fa-plus" aria-hidden="true"></i> Reserver</button>
+    </div>
+
+</div>
+<script>
+    $('#vehiculeSelect').on('change', function () {
+        var selectedOption = $(this).find('option:selected');
+        var modele = selectedOption.data('modele');
+        var marque = selectedOption.data('marque');
+        var prix = selectedOption.data('price');
+        var image = selectedOption.data('get_image');
+
+        $('#vehiculeModele').text(`Model: ${modele}`);
+        $('#vehiculeMarque').text(`Brand: ${marque}`);
+        $('#vehiculePrix').text(`Price: $${prix}`);
+        $('#vehiculeImage').attr('src', image);
+    });
+</script>
+{% endblock reservation %}

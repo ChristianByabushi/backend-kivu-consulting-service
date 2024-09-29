@@ -6,10 +6,10 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     # Marques
     path("", views.index, name="reservations"),
-    path("ajout-vehicule-au-panier", views.index, name="ajouter_au_panier"),
-    path("retirer-vehicule-au-panier", views.index, name="retirer_au_panier"),
-    path("editer-vehicule-au-panier", views.index, name="editer_au_panier"),
-    path("supprimer-vehicule-au-panier", views.index, name="supprimer_au_panier"),
+    path("ajouter", views.ajouter, name="ajouter_reservation"),
+    path("retirer-vehicule", views.index, name="retirer_reservation"),
+    path("editer-vehicule", views.index, name="editer_au_panier"),
+    path("supprimer-vehicule", views.index, name="supprimer_au_reservation"),
 ]
 #vehicule_editer
 

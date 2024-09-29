@@ -1,29 +1,33 @@
 {% extends "../core/index.html" %} {% load static %} {% block content %}
 <div class="container">
     <div class="page-inner">
-        <div class="page-header mb-0 d-flex justify-content-between">
-            <h3 class="fw-bold mb-1">Mes reservations</h3>
-            <button class="btn btn-secondary mb-2"> <i class="fa fa-plus-circle" aria-hidden="true"></i> Ajouter reservation</button>
+        <div class="page-header mb-0 d-flex justify-content-between"> 
+            <h2 class="fw-bold mb-1 text-secondary">Mes reservations</h2>
+            
+            {% if not request.resolver_match.url_name == 'ajouter_reservation'   %}
+            <a class="btn btn-secondary" href="{% url 'ajouter_reservation' %}">  <i class="fa fa-plus-circle" aria-hidden="true"></i> Ajouter reservation</a>                
+            {% endif %}
+                
         </div>
 
         {% block reservation %}
         <div class="card">
             <div class="card-header">
                 <div class="row mt-lg-1 search-row">
-                    <div class="col-lg-2  col-sm-4 col-6 mt-lg-1 mt-1">
+                    <div class="col-lg-2  col-sm-5 col-12 mt-lg-1 mt-1">
                         <select name="classeEleve" class="form-select form-control selectClasse" id="classeEleve">
                             <option value="">Approuvee</option>
                             <option value="">En attente</option>
                             <option value="">Annullee</option>
                         </select>
                     </div>
-                    <div class="col-lg-2 col-sm-3 mb-sm-1">
+                    <div class="col-lg-2 col-sm-3 col-5 mb-sm-1">
                         <input type="date" id="debut_date" class="form-control form-control" />
                     </div>
-                    <div class="col-1 mt-md-2 mb-sm-2 text-center">
+                    <div class="col-1 mt-md-2 mb-sm-1 text-center">
                         <span> -- </span>
                     </div>
-                    <div class="col-lg-2 col-3">
+                    <div class="col-lg-2 col-sm-3 col-5">
                         <input type="date" id="fin_date" class="form-control form-control" />
                     </div>
                     <div class="col-lg-2 col-6">
