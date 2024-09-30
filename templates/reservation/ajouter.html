@@ -2,15 +2,28 @@
 
 {% block reservation %}
 <div class="card">
-    <div class="card-header d-flex justify-content-between">
-        <a href="{% url 'reservations' %}"> <i class="fa fa-arrow-circle-left text-secondary" style="font-size: 30px;"
-                aria-hidden="true"></i></a>
-        <h3 class="text-center text-secondary">Reserver un vehicule choisissez à votre choix</h3>
-    </div>
+    <form id="vehiculeSelectionForm" method="POST">
+        {% csrf_token %}
 
-    <div class="card-body">
-        <form id="vehiculeSelectionForm" method="POST">
-            {% csrf_token %}
+        <div class="card-header d-flex justify-content-between">
+            <a href="{% url 'reservations' %}"> <i class="fa fa-arrow-circle-left text-secondary"
+                    style="font-size: 30px;" aria-hidden="true"></i></a>
+            <h3 class="text-center text-secondary">Reserver un vehicule choisissez à votre choix</h3>
+        </div>
+
+        <div class="card-body">
+            <div>
+                {% csrf_token %}
+                {% if form.errors %}
+                {% for field in form %}
+                {% for error in field.errors %}
+                <div class="alert alert-danger small" role="alert">
+                    {{field.name}} : {{ error }}!
+                </div>
+                {% endfor %}
+                {% endfor %}
+                {% endif %}
+            </div>
             <div class="mb-3">
                 <label for="vehiculeSelect" class="form-label">Choisir le vehicule de votre choix parmi les vehicules
                     disponibles au garage</label>
@@ -37,28 +50,38 @@
                 <div class="col-sm-6">
                     <p>Definissez la date à laquelle vous comptez allouer ce vechicule</p>
                     <div class="form-group">
-                      <label for="">Date de debut</label>
-                      <input type="date"
-                        class="form-control" name="dateFin" id="dateFin" aria-describedby="helpId" placeholder="">
+                        <label for="">Date de debut</label>
+                        <input type="date" class="form-control" name="dateDebut" id="dateDebut"
+                            aria-describedby="helpId" placeholder="">
+                        {% if form.dateDebut.errors %}
+                        <div class="text-danger">{{ form.dateDebut.errors }}</div>
+                        {% endif %}
                     </div>
                     <div class="text-center">
                         <span class="text-center">--</span>
                     </div>
                     <div class="form-group">
                         <label for="">Date de fin</label>
-                        <input type="date"
-                          class="form-control" name="dateDebut" id="dateDebut" aria-describedby="helpId" placeholder="">
-                      </div>
+                        <input type="date" class="form-control" name="dateFin" id="dateFin" aria-describedby="helpId"
+                            placeholder="">
+                        {% if form.dateFin.errors %}
+                        <div class="text-danger">{{ form.dateFin.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% if form.non_field_errors %}
+                    <div class="text-danger mt-2">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-        </form>
-
-
-    </div>
-    <div class="card-footer d-flex justify-content-between">
-        <a href="{% url 'reservations' %}" class="btn btn-danger">Annuler</a>
-        <button class="btn btn-secondary"> <i class="fa fa-plus" aria-hidden="true"></i> Reserver</button>
-    </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a href="{% url 'reservations' %}" class="btn btn-danger">Annuler</a>
+            <button type="submit" class="btn btn-secondary"> <i class="fa fa-plus" aria-hidden="true"></i>
+                Reserver</button>
+        </div>
+    </form>
 
 </div>
 <script>

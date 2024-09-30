@@ -1,0 +1,118 @@
+{% extends "../core/index.html" %} {% load static %} {% block content %}
+<div class="container">
+    <div class="page-inner">
+
+        <div class="page-header mb-0 d-flex justify-content-between">
+            <h2 class="fw-bold mb-1 text-warning">Mes Payements</h2>
+            
+            {% if request.user.role == 'Financier' or request.user.is_superuser %}
+            {% if not request.resolver_match.url_name == 'ajout_contrat_des_reservations' %}
+            <a class="btn btn-warning mb-1" href="{% url 'ajout_contrat_des_reservations' %}"> <i class="fa fa-plus-circle"
+                    aria-hidden="true"></i> Faire un payement</a>
+            {% endif %}
+            {% endif %}
+                
+       
+        </div>
+
+        {% block location %}
+        <div class="card">
+            <div class="card-header">
+                <div class="mt-2">
+                    {% if messages %}
+                    <ul class="list-group">
+                        {% for message in messages %}
+                        <li class="{{ message.tags }} list-group-item alert alert-info">{{ message }}</li>
+                        <script>
+                            $(".alert").alert();
+                        </script>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="row mt-lg-1 search-row">
+                    <form method="GET" action="{% url 'payements' %}" class="row">
+                        <div class="col-lg-2 col-12">
+                            <button type="submit" class="btn btn-warning"> 
+                                <i class="fa fa-search" aria-hidden="true"></i> Rechercher
+                            </button>
+                        </div>
+                
+                        <div class="col-lg-2 col-sm-3 col-5 mb-sm-1">
+                            <input type="date" id="debutDate" name="debutDate" class="form-control"
+                                value="{{ filters.debutDate|default_if_none:'' }}">
+                        </div>
+                
+                        <div class="col-1 mt-md-2 mb-sm-1 text-center">
+                            <span> -- </span>
+                        </div>
+                
+                        <div class="col-lg-2 col-sm-3 col-5">
+                            <input type="date" id="dateFin" name="dateFin" class="form-control"
+                                value="{{ filters.dateFin|default_if_none:'' }}">
+                        </div>
+                    </form>
+                </div>
+                
+            </div>
+
+            <div class="card-body table-responsive">
+                <table class="table table-responsive">
+                    <thead class="table-secondary">
+                        <th>#</th>
+                        <th>Date payement</th>
+                        <th>Date contrat</th>
+                        <th>Mode de paiement</th>
+                        <th>Montant</th>
+                        <th>Actions</th>
+                    </thead>
+
+                    <tbody>
+                        {% if not payements %}
+                        <div class="d-flex justify-content-center col-12 mt-4">
+                           <h4> --- Aucun payement deja effectué ou enregistré  ---</h4>
+                        </div>
+            {% endif %}
+                        {% for payement in payements %}
+                        <tr>
+                            <td>{{payement.id}}</td>
+                            <td>{{payement.date_paiement}}</td>
+                            <td>{{payement.contrat.date_signature}}</td>
+                            <td>{{payement.mode_paiement}}</td>
+                            <td>{{payement.montant}}$</td> 
+
+                            <td class=""> 
+                                <div class="form-button-action">
+                                    <a href="{% url 'generate_pdf_facture' payement.id  %}">
+                                    <button type="button"  title="telecharger la facture qui reprend les reserves sur la facture"
+                                        class="btn btn-link btn-danger btn-lg">
+                                        <i class="fa fa-download"></i>
+                                    </button>
+                                </a>
+                                </div>
+                            </td>
+
+                        </tr>
+                  
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+        {% endblock location %}
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.toggle-details').click(function () {
+            var locationId = $(this).data('location-id');
+            $('#details-' + locationId).toggle();
+            $(this).find('i').toggleClass('fa-chevron-down fa-chevron-up');
+        });
+    });
+</script>
+
+{% endblock content %}

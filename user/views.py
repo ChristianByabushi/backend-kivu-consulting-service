@@ -37,6 +37,7 @@ def register(request):
         user = Client.objects.create(email=email, password=password1, role="Client", first_name=firstname)
         user.password = make_password(password1)
         user.save()
+        messages.success('Utilisateur cree avec succes, veuillez alors vous connecter')
 
         return redirect('login')  
 

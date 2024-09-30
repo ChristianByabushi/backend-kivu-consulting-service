@@ -2,7 +2,6 @@ from django.db import models
 from user.models import User
 from user.models import User
 
-
 class Fournisseur(models.Model):
     nom = models.CharField(max_length=255, null=False)
     numeroTel = models.CharField(max_length=30, null=True)

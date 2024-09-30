@@ -1,0 +1,237 @@
+{% extends "../core/index.html" %} {% load static %}
+
+
+{% block content %}
+    
+    
+<style>
+    .card-image {
+
+        background-size: cover;
+        background-position: center;
+    }
+
+    span:hover {
+        color: blue;
+
+        display: none;
+    }
+</style>
+<div class="container">
+    <div class="row m-2">
+
+        <div class="col-md-2">
+            <div class="card min-vh-100">
+                <div class="card-header">
+                    <h4 class="card-title">Marques</h4>
+                </div>
+                <div class="card-body">
+                    <form id="filter-form" method="GET" action="{% url 'locations' %}">
+                        {% for marque in marques %}
+                        <input id="marque_{{marque.id}}" class="" type="checkbox" name="marques"
+                            value="{{ marque.id }}">
+                        {{ marque.nom }}
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="card min-vh-100">
+                <div class="card-header">
+                    <h4 class="card-title">Vehicules</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs nav-line nav-color-secondary" id="line-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="line-home-tab" data-bs-toggle="pill" href="#line-home"
+                                role="tab" aria-controls="pills-home" aria-selected="true">Tous</a>
+
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="line-profile-tab" data-bs-toggle="pill" href="#line-profile"
+                                role="tab" aria-controls="pills-profile" aria-selected="false">Disponibles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="line-contact-tab" data-bs-toggle="pill" href="#line-contact"
+                                role="tab" aria-controls="pills-contact" aria-selected="false">En location</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3 mb-3" id="line-tabContent">
+                        <!-- Tous -->
+                        <div class="tab-pane fade show active" id="line-home" role="tabpanel"
+                            aria-labelledby="line-home-tab">
+
+                            <div class="row">
+
+                                {% for vehicule in tous_les_vehicules %}
+                                <div class="col-md-4">
+                                    <div class="card" style="width: 18rem;">
+                                        <div class="card-img">
+                                            <img src="{{vehicule.get_image}}" class="img-fluid"
+                                                style="width: 200px; height:180px; max-width: 200px; max-height:180px ;  object-fit: fill; "
+                                                alt="not present">
+                                            <div class="card-img-overlay">
+                                                <h5 class="card-title text-white">
+                                                    {% if vehicule.enlocation %}
+                                                    <span class="text-white bg-danger">En location</span>
+                                                    {% else %}
+                                                    <span class="text-white bg-danger">Dispobible</span>
+                                                    {% endif %}
+                                                </h5>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body">
+                                            <p class="card-text">{{ vehicule.modele }},
+                                                {{vehicule.marque.nom}}
+                                            </p>
+                                            <p class="card-text"><strong>Prix: </strong>${{ vehicule.prix }}</p>
+                                        </div>
+                                        <div class="card-footer" style="z-index: 200;">
+                                            <button type="button" class="btn btn-secondary btn-xs btn-round"
+                                                data-id="{{ vehicule.id }}" data-price="{{ vehicule.prix }}">
+                                                <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                                                <span class="">Ajouter</span>
+                                            </button>
+                                            <button type="button" data-bs-toggle="modal"
+                                                data-bs-target="#exampleModalCartView"
+                                                class="btn btn-info btn-info-view btn-xs btn-round" data-bs-toggle="modal"
+                                                data-bs-target="#modalAddCart" data-id="{{ vehicule.id }}"
+                                                data-modele="{{vehicule.modele}}"
+                                                data-motorisation="{{vehicule.motorisation}}"
+                                                data-get_image="{{vehicule.get_image}}"
+                                                data-marque="{{vehicule.marque.nom}}" data-price="{{ vehicule.prix }}">
+                                                <i class="fa fa-eye" aria-hidden="true"></i>
+                                                <span class="">Voir</span>
+                                            </button>
+                                            <style>
+                                                .btn-add-cart:hover {
+                                                    color: red;
+                                                    cursor: pointer;
+                                                }
+                                            </style>
+                                            <button type="button" class="btn btn-warning btn-xs btn-round btn-add-cart"
+                                                data-id="{{ vehicule.id }}" data-price="{{ vehicule.prix }}">
+                                                <i class="fa fa-heart" aria-hidden="true"></i>
+                                                <span class="">Favoris</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                        <!-- Dispo -->
+                        <div class="tab-pane fade" id="line-profile" role="tabpanel" aria-labelledby="line-profile-tab">
+
+                        </div>
+                        <!-- En location -->
+                        <div class="tab-pane fade" id="line-contact" role="tabpanel" aria-labelledby="line-contact-tab">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCartView" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Details Vehicule</h5>
+                <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal" aria-label="Close">
+                    X
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="vehicleImage" src="" alt="Vehicle Image" class="img-fluid mb-3">
+                <p><strong>Model:</strong> <span id="vehicleModele"></span></p>
+                <p><strong>Motorisation:</strong> <span id="vehicleMotorisation"></span></p>
+                <p><strong>Marque:</strong> <span id="vehicleMarque"></span></p>
+                <p><strong>Price:</strong> $<span id="vehiclePrice"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-secondary"> <i class="fa fa-cart-plus" aria-hidden="true"></i> Reserver</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(document).ready(function () {
+            // Add click event to all buttons with the class 'btn-info'
+            $('.btn-info-view').on('click', function () {
+                var vehicleId = $(this).data('id');
+                var vehicleModele = $(this).data('modele');
+                var vehicleMotorisation = $(this).data('motorisation');
+                var vehicleImage = $(this).data('get_image');
+                var vehicleMarque = $(this).data('marque');
+                var vehiclePrice = $(this).data('price');
+
+                $('#vehicleModele').text(vehicleModele);
+                $('#vehicleMotorisation').text(vehicleMotorisation);
+                $('#vehicleMarque').text(vehicleMarque);
+                $('#vehiclePrice').text(vehiclePrice);
+                $('#vehicleImage').attr('src', vehicleImage);
+
+                $('#modalAddCart').modal('show');
+            });
+        });
+
+
+
+
+
+
+        $('.add-to-cart-link').on('click', function (e) {
+            e.preventDefault();  // Prevent the link from navigating
+            var productId = $(this).data('id');
+            var productName = $(this).data('name');
+            var productPrice = $(this).data('price');
+            var quantity = $('#quantity_' + productId).val();
+
+            $.ajax({
+                url: '/cart/add/',
+                method: 'POST',
+                data: {
+                    'product_id': productId,
+                    'quantity': quantity,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                success: function (response) {
+                    alert(productName + " has been added to your cart.");
+                },
+                error: function (error) {
+                    console.log(error);
+                    alert("There was an error adding the item to your cart.");
+                }
+            });
+        });
+    });
+
+
+
+
+
+    $('#exampleModal').on('show.bs.modal', event => {
+        var button = $(event.relatedTarget);
+        var modal = $(this);
+        // Use above variables to manipulate the DOM
+
+    });
+</script>
+{% endblock content %}

@@ -75,25 +75,15 @@
         </li>
 
         {% endif %}
-
         <li
-          class="nav-item {% if request.resolver_match.url_name == 'locations' %} active{% endif%} {% if request.resolver_match.url_name == 'locations' %} active{% endif%}"
+          class="nav-item {% if request.resolver_match.url_name == 'montrer_vehicules_a_louer' %} active{% endif%} {% if request.resolver_match.url_name == 'montrer_vehicules_a_louer' %} active{% endif%}"
         >
-          <a href="{% url 'locations' %}">
+          <a href="{% url 'montrer_vehicules_a_louer' %}">
             <i class="fa fa-home" aria-hidden="true"></i>
-            <p>Location</p>
-          </a>
-        </li>
-        <li
-          class="nav-item {% if request.resolver_match.url_name == 'locations' %} active{% endif%} {% if request.resolver_match.url_name == 'locations' %} active{% endif%}"
-        >
-          <a href="{% url 'locations' %}">
-            <i class="fas fa-cart-arrow-down"></i>
-            <p>Mon Panier</p>
+            <p>A Louer</p>
           </a>
         </li>
         {% if request.user.is_authenticated %}
-
         <li
           class="nav-item {% if request.resolver_match.url_name == 'reservations' %} active{% endif%} {% if request.resolver_match.url_name == 'ajouter_reservation' %} active{% endif%}"
         >
@@ -103,6 +93,15 @@
           </a>
         </li>
         <li
+          class="nav-item {% if request.resolver_match.url_name == 'locations' %} active{% endif%} {% if request.resolver_match.url_name == 'ajout_contrat_des_reservations' %} active{% endif%}"
+        >
+          <a href="{% url 'locations' %}">
+            <i class="fa fa-paper fa-paperclip" aria-hidden="true"></i>
+            <p>Mes locations</p>
+          </a>
+        </li>
+
+        <li
           class="nav-item {% if request.resolver_match.url_name == 'payements' %} active{% endif%} {% if request.resolver_match.url_name == 'payements' %} active{% endif%}"
         >
           <a href="{% url 'payements' %}">
@@ -111,14 +110,13 @@
           </a>
         </li>
 
-
-        <li
-          class="nav-item" >
+        <li class="nav-item">
           <a href="{% url 'logout' %}">
-            <i class="fa fa-arrow-left"></i>
+            <i class="fas fa-arrow-left"></i>
             <p>Deconnexion</p>
           </a>
         </li>
+
         {% endif%} {% if 'Administration' in groups %}
         <li class="nav-section">
           <span class="sidebar-mini-icon">

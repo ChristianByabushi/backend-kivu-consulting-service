@@ -36,3 +36,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.avatar:
             return self.avatar.url
         return None
+    
+    def __str__(self):
+        return f"{self.id}-{self.email}"

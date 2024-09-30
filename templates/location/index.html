@@ -1,254 +1,141 @@
-{% extends "../core/index.html" %} {% load static %}
-{% block content %}
-
-<style>
-    .card-image {
-
-        background-size: cover;
-        background-position: center;
-    }
-
-    span:hover {
-        color: blue;
-
-        display: none;
-    }
-</style>
+{% extends "../core/index.html" %} {% load static %} {% block content %}
 <div class="container">
-    <div class="row m-2">
+    <div class="page-inner">
+        <div class="page-header mb-0 d-flex justify-content-between">
+            <h2 class="fw-bold mb-1 text-secondary">Mes locations</h2>
 
-        <div class="col-md-2">
-            <div class="card min-vh-100">
-                <div class="card-header">
-                    <h4 class="card-title">Marques</h4>
-                </div>
-                <div class="card-body">
-                    <form id="filter-form" method="GET" action="{% url 'locations' %}">
-                        {% for marque in marques %}
-                        <input id="marque_{{marque.id}}" class="" type="checkbox" name="marques"
-                            value="{{ marque.id }}">
-                        {{ marque.nom }}
+            {% if not request.resolver_match.url_name == 'ajout_contrat_des_reservations' %}
+            <a class="btn btn-secondary mb-1" href="{% url 'ajout_contrat_des_reservations' %}"> <i class="fa fa-plus-circle"
+                    aria-hidden="true"></i> Commander</a>
+            {% endif %}
+
+        </div>
+
+        {% block location %}
+        <div class="card">
+            <div class="card-header">
+                <div class="mt-2">
+                    {% if messages %}
+                    <ul class="list-group">
+                        {% for message in messages %}
+                        <li class="{{ message.tags }} list-group-item alert alert-info">{{ message }}</li>
+                        <script>
+                            $(".alert").alert();
+                        </script>
                         {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="row mt-lg-1 search-row">
+                    <form method="GET" action="{% url 'locations' %}" class="row">
+                        <div class="col-lg-2 col-12">
+                            <button type="submit" class="btn btn-secondary"> <i class="fa fa-search"
+                                    aria-hidden="true"></i> Rechercher</button>
+                        </div> 
+
+                        <div class="col-lg-2 col-sm-3 col-5 mb-sm-1">
+                            <input type="date" id="debutDate" name="debutDate" class="form-control form-control"
+                                value="{{ filters.debutDate }}">
+                        </div>
+                        <div class="col-1 mt-md-2 mb-sm-1 text-center">
+                            <span> -- </span>
+                        </div>
+
+                        <div class="col-lg-2 col-sm-3 col-5">
+                            <input type="date" id="dateFin" name="dateFin" class="form-control form-control"
+                                value="{{ filters.dateFin }}">
+                        </div>
+
+                        <div class="col-lg-4 col-6">
+                            <select name="type" id="type" class="form-select form-control selectOption">
+                                <option value="">Par commande</option>
+                                <option value="">Par locations</option>
+                                
+                            </select>
+                        </div>
+
                     </form>
                 </div>
+
             </div>
-        </div>
 
-        <div class="col-md-10">
-            <div class="card min-vh-100">
-                <div class="card-header">
-                    <h4 class="card-title">Vehicules</h4>
-                </div>
-                <div class="card-body">
-                    <ul class="nav nav-tabs nav-line nav-color-secondary" id="line-tab" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="line-home-tab" data-bs-toggle="pill" href="#line-home"
-                                role="tab" aria-controls="pills-home" aria-selected="true">Tous</a>
+            <div class="card-body table-responsive">
+                <table class="table table-responsive">
 
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="line-profile-tab" data-bs-toggle="pill" href="#line-profile"
-                                role="tab" aria-controls="pills-profile" aria-selected="false">Disponibles</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="line-contact-tab" data-bs-toggle="pill" href="#line-contact"
-                                role="tab" aria-controls="pills-contact" aria-selected="false">En location</a>
-                        </li>
-                    </ul>
-                    <div class="tab-content mt-3 mb-3" id="line-tabContent">
-                        <!-- Tous -->
-                        <div class="tab-pane fade show active" id="line-home" role="tabpanel"
-                            aria-labelledby="line-home-tab">
+                    <thead class="table-secondary">
+                        <th>#</th>
+                        <th>Date contrat</th>
+                        <th>Description</th>
+                        <th>Montat-total</th>
+                        <th>Etat commande</th>
+                        <th>Actions</th>
+                    </thead>
 
-                            <div class="row">
-
-                                {% for vehicule in tous_les_vehicules %}
-                                <div class="col-md-4">
-                                    <div class="card" style="width: 18rem;">
-                                        <div class="card-img">
-                                            <img src="{{vehicule.get_image}}" class="img-fluid"
-                                                style="width: 200px; height:180px; max-width: 200px; max-height:180px ;  object-fit: fill; "
-                                                alt="not present">
-
-
-                                            <div class="card-img-overlay">
-                                                <h5 class="card-title text-white">
-                                                    {% if vehicule.enlocation %}
-                                                    <span class="text-white bg-danger">En location</span>
-                                                    {% else %}
-                                                    <span class="text-white bg-danger">Dispobible</span>
-                                                    {% endif %}
-                                                </h5>
-                                            </div>
-                                        </div>
-
-                                        <div class="card-body">
-                                            <p class="card-text">{{ vehicule.modele }},
-                                                {{vehicule.marque.nom}}
-                                            </p>
-                                            <p class="card-text"><strong>Prix: </strong>${{ vehicule.prix }}</p>
-                                        </div>
-                                        <div class="card-footer" style="z-index: 200;">
-                                            <button type="button" class="btn btn-secondary btn-xs btn-round"
-                                                data-id="{{ vehicule.id }}" data-price="{{ vehicule.prix }}">
-                                                <i class="fa fa-cart-plus" aria-hidden="true"></i>
-                                                <span class="">Ajouter</span>
-                                            </button>
-                                            <button type="button" data-bs-toggle="modal"
-                                                data-bs-target="#exampleModalCartView"
-                                                class="btn btn-info btn-info-view btn-xs btn-round" data-bs-toggle="modal"
-                                                data-bs-target="#modalAddCart" data-id="{{ vehicule.id }}"
-                                                data-modele="{{vehicule.modele}}"
-                                                data-motorisation="{{vehicule.motorisation}}"
-                                                data-get_image="{{vehicule.get_image}}"
-                                                data-marque="{{vehicule.marque.nom}}" data-price="{{ vehicule.prix }}">
-                                                <i class="fa fa-eye" aria-hidden="true"></i>
-                                                <span class="display-5">Voir</span>
-                                            </button>
-                                            <style>
-                                                .btn-add-cart:hover {
-                                                    color: red;
-                                                    cursor: pointer;
-                                                }
-                                            </style>
-                                            <button type="button" class="btn btn-warning btn-xs btn-round btn-add-cart"
-                                                data-id="{{ vehicule.id }}" data-price="{{ vehicule.prix }}">
-                                                <i class="fa fa-heart" aria-hidden="true"></i>
-                                                <span class="">Favoris</span>
-                                            </button>
-                                        </div>
-                                    </div>
+                    <tbody>
+                        {% for location in enlocations %}
+                        <tr>
+                            <td>{{location.id}}</td>
+                            <td>{{location.date_signature}}</td>
+                            <td>{{location.description}}</td>
+                            <td>{{location.montant_total}}$</td> 
+                            
+                            {% if location.pret %}
+                            <td>facture deja elaborée</td>
+                            {% else %}
+                            <td>commande recue</td>
+                            {% endif %}
+                            <td class=""> 
+                                <div class="form-button-action">
+                                    <a href="{% url 'generate_pdf_contrat_commande' location.id  %}">
+                                    <button type="button"  title="telecharger la facture qui reprend les reserves sur la facture"
+                                        class="btn btn-link btn-danger btn-lg">
+                                        <i class="fa fa-download"></i>
+                                    </button>
+                                </a>
                                 </div>
+                                <div class="form-button-action">
+                                    <button type="button" class="btn btn-link btn-info btn-lg toggle-details"
+                                        data-location-id="{{ location.id }}">
+                                        <i class="fa fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="reservation-details table-light" id="details-{{ location.id }}"
+                            style="display: none;">
+                            <td colspan="6" class="mt-2">
+                                <h6>Details Contrat #{{ location.id }}:</h6>
+                                <div class="d-flex gap-1">
+                                    {% for reservation in location.reservation.all %}
+                                    <div class="col-6">
+                                        <div>Vehicule :{{ reservation.vehicule.modele }} </div>
+                                        <div>Vehicule :{{ reservation.vehicule.marque }} </div>
+                                        <div>Date de debut reservation :{{ reservation.dateFin }} </div>
+                                        <div>Date de fin :{{ reservation.dateDebut }} </div>
+                                    </div>
+                                    {% endfor %}
 
-                                {% endfor %}
-                            </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
 
-                        </div>
-
-                        <!-- Dispo -->
-                        <div class="tab-pane fade" id="line-profile" role="tabpanel" aria-labelledby="line-profile-tab">
-
-                        </div>
-                        <!-- En location -->
-                        <div class="tab-pane fade" id="line-contact" role="tabpanel" aria-labelledby="line-contact-tab">
-
-                        </div>
-                    </div>
-                </div>
+                </table>
             </div>
         </div>
-    </div>
+        {% endblock location %}
 
-</div>
-
-
-
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModalCartView" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Details Vehicule</h5>
-                <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal" aria-label="Close">
-                    X
-                </button>
-            </div>
-            <div class="modal-body">
-                <img id="vehicleImage" src="" alt="Vehicle Image" class="img-fluid mb-3">
-                <p><strong>Model:</strong> <span id="vehicleModele"></span></p>
-                <p><strong>Motorisation:</strong> <span id="vehicleMotorisation"></span></p>
-                <p><strong>Marque:</strong> <span id="vehicleMarque"></span></p>
-                <p><strong>Price:</strong> $<span id="vehiclePrice"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-secondary"> <i class="fa fa-cart-plus" aria-hidden="true"></i> Reserver</button>
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
     $(document).ready(function () {
-        $(document).ready(function () {
-            // Add click event to all buttons with the class 'btn-info'
-            $('.btn-info-view').on('click', function () {
-                var vehicleId = $(this).data('id');
-                var vehicleModele = $(this).data('modele');
-                var vehicleMotorisation = $(this).data('motorisation');
-                var vehicleImage = $(this).data('get_image');
-                var vehicleMarque = $(this).data('marque');
-                var vehiclePrice = $(this).data('price');
-
-                $('#vehicleModele').text(vehicleModele);
-                $('#vehicleMotorisation').text(vehicleMotorisation);
-                $('#vehicleMarque').text(vehicleMarque);
-                $('#vehiclePrice').text(vehiclePrice);
-                $('#vehicleImage').attr('src', vehicleImage);
-
-                $('#modalAddCart').modal('show');
-            });
+        $('.toggle-details').click(function () {
+            var locationId = $(this).data('location-id');
+            $('#details-' + locationId).toggle();
+            $(this).find('i').toggleClass('fa-chevron-down fa-chevron-up');
         });
-
-
-
-
-
-
-        $('.add-to-cart-link').on('click', function (e) {
-            e.preventDefault();  // Prevent the link from navigating
-            var productId = $(this).data('id');
-            var productName = $(this).data('name');
-            var productPrice = $(this).data('price');
-            var quantity = $('#quantity_' + productId).val();
-
-            $.ajax({
-                url: '/cart/add/',
-                method: 'POST',
-                data: {
-                    'product_id': productId,
-                    'quantity': quantity,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}',
-                },
-                success: function (response) {
-                    alert(productName + " has been added to your cart.");
-                },
-                error: function (error) {
-                    console.log(error);
-                    alert("There was an error adding the item to your cart.");
-                }
-            });
-        });
-    });
-
-
-
-
-
-    $('#exampleModal').on('show.bs.modal', event => {
-        var button = $(event.relatedTarget);
-        var modal = $(this);
-        // Use above variables to manipulate the DOM
-
-    });
-</script>
-
-
-
-
-
-
-
-
-<script text="text-javascript">
-    $(".supprimerVehicule").click(function (e) {
-        e.preventDefault();
-        if (confirm('Voulez vraiment supprimer ce produit ?')) {
-            var itemSlug = $(this).attr('data-slug');
-            var url = `/garage/vehicules/supprimer/${itemSlug}/`;
-            window.location.href = url;
-        }
     });
 </script>
 

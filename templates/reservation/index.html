@@ -1,128 +1,140 @@
 {% extends "../core/index.html" %} {% load static %} {% block content %}
 <div class="container">
     <div class="page-inner">
-        <div class="page-header mb-0 d-flex justify-content-between"> 
+        <div class="page-header mb-0 d-flex justify-content-between">
             <h2 class="fw-bold mb-1 text-secondary">Mes reservations</h2>
-            
-            {% if not request.resolver_match.url_name == 'ajouter_reservation'   %}
-            <a class="btn btn-secondary" href="{% url 'ajouter_reservation' %}">  <i class="fa fa-plus-circle" aria-hidden="true"></i> Ajouter reservation</a>                
+
+            {% if not request.resolver_match.url_name == 'ajouter_reservation' %}
+            <a class="btn btn-secondary mb-1" href="{% url 'ajouter_reservation' %}"> <i class="fa fa-plus-circle"
+                    aria-hidden="true"></i> Ajouter reservation</a>
             {% endif %}
-                
+
         </div>
 
         {% block reservation %}
         <div class="card">
             <div class="card-header">
-                <div class="row mt-lg-1 search-row">
-                    <div class="col-lg-2  col-sm-5 col-12 mt-lg-1 mt-1">
-                        <select name="classeEleve" class="form-select form-control selectClasse" id="classeEleve">
-                            <option value="">Approuvee</option>
-                            <option value="">En attente</option>
-                            <option value="">Annullee</option>
-                        </select>
-                    </div>
-                    <div class="col-lg-2 col-sm-3 col-5 mb-sm-1">
-                        <input type="date" id="debut_date" class="form-control form-control" />
-                    </div>
-                    <div class="col-1 mt-md-2 mb-sm-1 text-center">
-                        <span> -- </span>
-                    </div>
-                    <div class="col-lg-2 col-sm-3 col-5">
-                        <input type="date" id="fin_date" class="form-control form-control" />
-                    </div>
-                    <div class="col-lg-2 col-6">
-                        <select name="sectionOption" id="section_option" class="form-select form-control selectOption">
-                            <option value="">Par marques</option>
-                            {% for option in options %}
-                            <option value="{{option.id}}">{{option.designation}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-6">
-                        <select name="" class="form-select form-control selectClasse" id="">
-                            <option value="">Par Vehicules</option>
-                        </select>
-                    </div>
+                <div class="mt-2">
+                    {% if messages %}
+                    <ul class="list-group">
+                        {% for message in messages %}
+                        <li class="{{ message.tags }} list-group-item alert alert-warning">{{ message }}</li>
+                        <script>
+                            $(".alert").alert();
+                        </script>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                 </div>
+                <div class="row mt-lg-1 search-row">
+                    <form method="GET" action="{% url 'reservations' %}" class="row">
+                        <div class="col-lg-2 col-sm-5 col-12 mt-lg-1 mt-1">
+                            <select name="statut" class="form-select form-control selectClasse" id="statut">
+                                <option value="">Statut</option>
+                                <option value="Approuvee" {% if filters.statut == "Approuvee" %} selected {% endif %}>
+                                    Approuvée</option>
+                                <option value="en_attente" {% if filters.statut == "En attente" %} selected {% endif %}>En
+                                    attente</option>
+                                <option value="Annullee" {% if filters.statut == "Annullee" %} selected {% endif %}>Annulée
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-sm-3 col-5 mb-sm-1">
+                            <input type="date" id="debutDate" name="debutDate" class="form-control form-control"
+                                value="{{ filters.debutDate }}">
+                        </div>
+                        <div class="col-1 mt-md-2 mb-sm-1 text-center">
+                            <span> -- </span>
+                        </div>
+
+                        <div class="col-lg-2 col-sm-3 col-5">
+                            <input type="date" id="dateFin" name="dateFin" class="form-control form-control"
+                                value="{{ filters.dateFin }}">
+                        </div> 
+
+                        <div class="col-lg-2 col-6">
+                            <select name="marque" id="marque" class="form-select form-control selectOption">
+                                <option value="">Par marques</option>
+                                {% for marque in marques %}
+                                <option value="{{ marque.id }}" {% if filters.marque == marque.id|stringformat:"s" %} selected {% endif %}>
+                                    {{ marque.nom }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-lg-3 col-6">
+                            <select name="vehicule" class="form-select form-control selectClasse" id="vehicule">
+                                <option value="">Par véhicules</option>
+                                {% for vehicule in tous_les_vehicules %}
+                                <option value="{{ vehicule.id }}" {% if filters.vehicule == vehicule.id|stringformat:"s" %} selected {% endif %}>
+                                    {{ vehicule.id }}##{{ vehicule.modele }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div> 
+
+                        <div class="col-lg-3 col-12 mt-lg-1 mt-2">
+                            <button type="submit" class="btn btn-secondary"> <i class="fa fa-search" aria-hidden="true"></i> Rechercher</button>
+                        </div>
+                    </form>
+                </div>
+
             </div>
-        </div>
 
-        <div class="card-body table-responsive">
-            <!-- Reservation -->
-            {% if reservation %}
-            <table class="table ">
-                <thead class="text-light">
-                    <th>Véhicule</th>
-                    <th>Marque</th>
-                    <th class="text-center">Prix</th>
-                    <th>Date Fin</th>
-                    <th>Date Début</th>
-                    <th>Date Creation</th>
-                    <th>Statut</th>
-                    <th class="text-center">###</th>
-                </thead>
-                <tbody>
-                    {% for reservation in reservations %}
-                    <tr class="{% if reservation.statut == 'Approuvee' %} table-secondary {% endif %}">
-                        <td>{{reservation.vehicule}}</td>
-                        <td>{{reservation.vehicule.marque }}</td>
-                        <td class="text-center">{{reservation.vehicule.prix }}</td>
-                        <td>{{reservation.dateFin }}</td>
-                        <td>{{reservation.dateDebut }}</td>
-                        <td>{{reservation.date_creation }}</td>
-                        <td>{{reservation.statut }}</td>
-                        <td class="text-center">
-                            <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title=""
-                                    class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-                                    data-original-title="Remove">
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="card-body table-responsive">
+                <!-- Reservation -->
+                <table class="table ">
+                    <thead class="table-secondary">
+                        <th>Véhicule</th>
+                        <th>Marque</th>
+                        <th class="text-center">Prix</th>
+                        <th>Date Fin</th>
+                        <th>Date Début</th>
+                        <th>Date Creation</th>
+                        <th>Statut</th>
+                        <th class="text-center">###</th>
+                    </thead>
+                    <tbody>
 
-            {% elif contrat %}
-            <table class="table table-responsive">
-                <thead>
-                    <th>#</th>
-                    <th>Montat-total</th>
-                    <th>Description</th>
-                    <th>Date Creation</th>
-                    <th>###</th>
-                </thead>
-                <tbody>
-                    {% for contract in contracts %}
-                    <tr>
-                        <td>{{contract}}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <div class="form-button-action">
-                                <button type="button" data-bs-toggle="tooltip" title=""
-                                    class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task">
-                                    <i class="fa fa-file-pdf"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
+                        
+                        {% if not reservations %}
+                            Aucune  reservation nest disponible maintenant
+                        {% endif %}
+                            
+                        {% for reservation in reservations %}
+                        <tr class="{% if reservation.statut == 'Approuvee' %} table-light {% endif %}">
+                            <td>{{reservation.vehicule}}</td>
+                            <td>{{reservation.vehicule.marque }}</td>
+                            <td class="text-center">{{reservation.vehicule.prix }}</td>
+                            <td>{{reservation.dateFin }}</td>
+                            <td>{{reservation.dateDebut }}</td>
+                            <td>{{reservation.date_creation }}</td>
+                            <td>{{reservation.statut }}</td>
+                            <td class="text-center">
+                                <div class="form-button-action">
+                                    <button type="button" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-link btn-danger" data-original-title="Remove">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
+       
+
+            </div>
         </div>
         {% endblock reservation %}
 
     </div>
-</div>
 </div>
 
 {% endblock content %}
