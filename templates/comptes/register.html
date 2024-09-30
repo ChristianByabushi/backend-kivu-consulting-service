@@ -54,15 +54,15 @@
             <img src="{% static 'assets/img/logokcs.jpg' %}"
                 style="max-width: 150px; max-height: 100px; object-fit: fill; " alt="Logo Institution" class="logo">
             {% csrf_token %}
-            <div>
-                {% if messages %}
-                <ul>
-                    {% for message in messages %}
-                    <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             </div>
+           {% endif %}
             <div class="form-group">
                 <div class="row">
                     <div class="col-12">

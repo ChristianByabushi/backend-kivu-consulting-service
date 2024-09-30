@@ -12,34 +12,48 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required,login_not_required
 from user.models import User
 from django.contrib import messages
-from vendors.models import Client
-@login_not_required
+from vendors.models import Client 
+
+@login_not_required  
 def register(request):
-    if not request.method=='POST':
-        return render(request, "comptes/register.html")  
-    else:
-        email = request.POST.get("email")
-        password1 = request.POST.get("password1")
-        firstname = request.POST.get("firstname")
-        password2 = request.POST.get("password2")
+    if request.method != 'POST':
+        return render(request, "comptes/register.html")
+    
+    # Get data from the POST request
+    email = request.POST.get("email")
+    password1 = request.POST.get("password1")
+    firstname = request.POST.get("firstname")
+    password2 = request.POST.get("password2")
 
-        # Check if passwords match
-        if password1 != password2:
-            messages.error(request, "Les mots de passe ne correspondent pas.")
-            return render(request, "comptes/register.html")
+    # Validate form inputs
+    if password1 != password2:
+        messages.error(request, "Les mots de passe ne correspondent pas.")
+        return render(request, "comptes/register.html", {
+            'email': email,
+            'firstname': firstname
+        })
 
-        # Check if email already exists
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Un utilisateur avec cet e-mail existe déjà.")
-            return render(request, "comptes/register.html")
+    if User.objects.filter(email=email).exists():
+        messages.error(request, "Un utilisateur avec cet e-mail existe déjà.")
+        return render(request, "comptes/register.html", {
+            'email': email,
+            'firstname': firstname
+        })
 
-        # Create the user without username
-        user = Client.objects.create(email=email, password=password1, role="Client", first_name=firstname)
-        user.password = make_password(password1)
-        user.save()
-        messages.success('Utilisateur cree avec succes, veuillez alors vous connecter')
+    # Create the user
+    user = Client.objects.create(
+        email=email,
+        password=make_password(password1),  # Hash the password here
+        role="Client",
+        first_name=firstname
+    )
+    user.save()
 
-        return redirect('login')  
+    # Send success message and redirect to login
+    messages.success(request, 'Utilisateur créé avec succès, veuillez vous connecter.')
+    return redirect('login')
+
+
 
 @login_not_required
 def login(request):
@@ -51,7 +65,7 @@ def login(request):
         password = request.POST.get('password')  
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            auth_login(request, user)
+            auth_login(request, user) 
             return redirect('index')
         else:
             error_message = 'Utilisateur ou mot de passe incorrect' 

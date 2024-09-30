@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from payement.models import Payement
 from reportlab.lib.pagesizes import A4, A6
 from reportlab.lib import colors
@@ -47,6 +47,41 @@ def index(request):
             "dateFin": date_fin
         }
     })
+    
+    
+def payements(request):
+    debut_date = request.GET.get("debutDate")
+    date_fin = request.GET.get("dateFin")
+    email = request.GET.get("email")
+    
+    payements = Payement.objects.distinct() 
+    if email:
+        payements.filter(contrat__reservation__client__email=request.user.email)
+    
+    if debut_date and date_fin:
+        try:
+            debut_date_obj = datetime.strptime(debut_date, "%Y-%m-%d").date()
+            date_fin_obj = datetime.strptime(date_fin, "%Y-%m-%d").date()
+
+            payements = payements.filter(
+                contrat__date_signature__range=(debut_date_obj, date_fin_obj)
+            )
+        except ValueError:
+            pass  
+        
+    return render(request, "payement/index-gerer.html", {
+        "payements": payements,
+        "filters": {
+            "debutDate": debut_date,
+            "dateFin": date_fin
+        }
+    })
+
+
+def Ajouterpayements(request):
+    return redirect('')
+
+
 
 
 def generate_pdf_facture(request, idPayement):
@@ -97,7 +132,7 @@ def generate_pdf_facture(request, idPayement):
         elements.append(Spacer(1, 12))
         elements.append(
             Paragraph(
-                f"La presente temoigne le paiement du client et invite lentreprise de bien vouloir livre les vehicules au fournisseur, celui-ci apres avoir accepte leur etat sengage de bien vouloir les retourner en bon etat et de signaler en cas de probleme tout prejudice avec des preuves (images), heures et tout autre digne de confiance.",
+                f"La presente temoigne le paiement du client et invite l'entreprise de bien vouloir livre les vehicules au fournisseur, celui-ci apres avoir accepté leur etat sùengage de bien vouloir les retourner en bon état et de signaler en cas de probleme tout préjudice avec des preuves (images), heures ou tout autre informations digne de confiance.",
                 styles["Normal"],
             )
         )
@@ -109,7 +144,7 @@ def generate_pdf_facture(request, idPayement):
         elements.append(Spacer(1, 12))
 
         elements.append(
-            Paragraph(f"Mode de paiement: {payement.date_paiement}", styles["Normal"])
+            Paragraph(f"Mode de paiement: {payement.mode_paiement}", styles["Normal"])
         )
 
         elements.append(Spacer(1, 15))

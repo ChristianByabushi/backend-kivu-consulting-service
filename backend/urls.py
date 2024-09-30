@@ -15,7 +15,7 @@ from vehicule.views import (
 
 from contract.views import *
 
-from location.views import index
+from vehicule.views import index
 from location.views import montrer_vehicules_a_louer
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -36,11 +36,11 @@ urlpatterns = [
     path("mes-vehicules-loués/ajouter/", ajout_contrat_des_reservations, name="ajout_contrat_des_reservations"), 
     path("mes-vehicules-loués/commande/print/<int:idContrat>/", generate_pdf_contrat_commande, name="generate_pdf_contrat_commande"), 
     
-    
     #payements generate_pdf_facture
     path("payements/", generate_pdf_contrat_commande, name="generate_pdf_contrat_commande"), 
-    path("payements/print/<int:idPayement>/", generate_pdf_facture, name="generate_pdf_facture"), 
-    
+    path("payements/print/<int:idPayement>/", generate_pdf_facture, name="generate_pdf_facture"), # recordpayements 
+    path("gerer-payements/", payements, name="recordpayements"), #  
+    path("gerer-payements/ajouter-payements/", Ajouterpayements, name="ajout_payement"), 
     
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

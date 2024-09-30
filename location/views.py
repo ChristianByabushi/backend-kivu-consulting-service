@@ -15,8 +15,10 @@ def index(request):
         'tous_les_vehicules':tous_les_vehicules,
         'enlocations':enlocations
     }
-    return render(request, 'location/index.html',context)
+    return render(request, 'location/index.html',context) 
 
+
+@login_not_required
 def montrer_vehicules_a_louer(request):
     marques = Marque.objects.all()
     tous_les_vehicules= Vehicule.objects.all()

@@ -81,8 +81,18 @@
         {% endif %}
         {% endif %}
 
+
         <div class="login-card">
             
+            {% if messages %}
+            <div class="messages d-block">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
             <form method="POST">
                 <img src="{% static 'assets/img/logokcs.jpg' %}"
                 style="max-width: 150px; max-height: 100px; object-fit: fill; " alt="Logo Institution" class="logo">
@@ -98,7 +108,7 @@
                                     <i class="fa fa-user"></i>
                                 </span>
                                 <input name="username" id='username' type="text" class="form-control"
-                                    placeholder="utilisateur" />
+                                    placeholder="Adresse email" />
                             </div>
                         </div>
                     </div>

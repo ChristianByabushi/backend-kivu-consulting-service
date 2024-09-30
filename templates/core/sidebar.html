@@ -101,14 +101,30 @@
           </a>
         </li>
 
+
+
+        
+        {% if request.user.is_superuser or request.user.role == 'Financier' %}
         <li
-          class="nav-item {% if request.resolver_match.url_name == 'payements' %} active{% endif%} {% if request.resolver_match.url_name == 'payements' %} active{% endif%}"
-        >
-          <a href="{% url 'payements' %}">
-            <i class="fa fa-money-check" aria-hidden="true"></i>
-            <p>Mes payements</p>
-          </a>
-        </li>
+        class="nav-item {% if request.resolver_match.url_name == 'recordpayements' %} active{% endif%} {% if request.resolver_match.url_name == 'ajout_payement' %} active{% endif%}"
+      >
+        <a href="{% url 'recordpayements' %}">
+          <i class="fa fa-money-check" aria-hidden="true"></i>
+          <p>Payements</p>
+        </a>
+      </li>
+      
+      {% else %}
+      <li
+      class="nav-item {% if request.resolver_match.url_name == 'payements' %} active{% endif%} {% if request.resolver_match.url_name == 'payements' %} active{% endif%}"
+    >
+      <a href="{% url 'payements' %}">
+        <i class="fa fa-money-check" aria-hidden="true"></i>
+        <p>Mes Payements</p>
+      </a>
+    </li>
+        {% endif %}
+          
 
         <li class="nav-item">
           <a href="{% url 'logout' %}">
