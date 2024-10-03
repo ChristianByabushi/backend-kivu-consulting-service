@@ -23,21 +23,18 @@ def index(request):
     return render(request, "reservation/index.html", context)
 
 def index(request):
-    # Get all possible options
+
     marques = Marque.objects.all()
     tous_les_vehicules = Vehicule.objects.all()
 
-    # Get the filter parameters from GET request
     statut = request.GET.get('statut')
     debut_date = request.GET.get('debutDate')
     fin_date = request.GET.get('dateFin')
     marque_id = request.GET.get('marque')
     vehicule_id = request.GET.get('vehicule')
 
-    # Start with all reservations for the current user
     reservations = Reservation.objects.filter(client=request.user)
 
-    # Apply filters if they exist
     if statut:
         reservations = reservations.filter(statut=statut)
     if debut_date:
@@ -49,9 +46,9 @@ def index(request):
     if vehicule_id:
         reservations = reservations.filter(vehicule_id=vehicule_id)
 
-    # Other filtering logic for enlocations and contrats
     enlocations = Vehicule.objects.filter(enlocation=True)
     contrats = ContratLocation.objects.filter(reservation__client=request.user)
+
 
     context = {
         "marques": marques,
@@ -61,6 +58,7 @@ def index(request):
         "reservations": reservations,
         "filters": request.GET,  # Pass the filters back to template
     }
+    
     
     return render(request, "reservation/index.html", context)
 

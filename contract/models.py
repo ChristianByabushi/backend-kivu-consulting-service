@@ -10,4 +10,5 @@ class ContratLocation(models.Model):
     pret=models.BooleanField(default=False)
     
     def __str__(self):
-        return f"Contract Vehicule#{self.id}"
+        return f"Contract Vehicule#{self.id}" 
+    
