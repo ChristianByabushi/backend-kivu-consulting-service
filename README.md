@@ -1,6 +1,6 @@
 # Goods, Services Contract Management
 
-**Vehicules Contract Management** is a comprehensive web application designed to manage vehicle-related contracts, reservations, and user roles. It provides features for efficiently handling contract creation, tracking reservations, and generating reports with advanced access control through user roles.
+**Vehicles Contract Management** is a comprehensive web application designed to manage vehicle-related contracts, reservations, and user roles. It provides features for efficiently handling contract creation, tracking reservations, and generating reports with advanced access control through user roles.
 
 ## Features
 
